@@ -7,6 +7,8 @@ import Error from "./pages/Error"
 import Gallery from "./pages/Gallery"
 import Courses from "./pages/Courses"
 import Contact from "./pages/Contact"
+import Footer from "./components/Footer"
+import GoToTop from "./components/GoToTop"
 
 function App() {
 
@@ -22,6 +24,8 @@ function App() {
         <Route path="/gallery" element={<Gallery/>}/>
         <Route path="*" element={<Error/>}/>
       </Routes>
+      <GoToTop/>
+      <Footer/>
   </BrowserRouter>
   )
 }

@@ -8,8 +8,8 @@ const Services = () => {
   return (
 
     <>
-      <h1 className='text-black text-2xl w-full flex flex-col items-center justify-start font-extrabold uppercase relative after:block after:w-20 after:h-1 hover:after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-20 after:mt-1 after:mb-2 overflow-y-hidden'>Services</h1>
-      <div className='grid lg:grid-cols-3 grid-cols-1 md:grid-cols-2 gap-2 px-4 md:px-30 p-5 mx-30 w-[90%] items-center justify-center  overflow-y-hidden'>
+      <h1 className='text-black text-2xl pt-9 w-full flex flex-col items-center justify-start font-extrabold uppercase relative after:block after:w-20 after:h-1 hover:after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-20 after:mt-1 after:mb-2 overflow-y-hidden'>Services</h1>
+      <div className='grid lg:grid-cols-3 grid-cols-1 md:grid-cols-2 gap-2 px-2 md:px-40 pb-20 p-5 mx-auto w-[90%] items-center justify-center  overflow-y-hidden'>
 
         {
           ServicesData.map((items) => {
