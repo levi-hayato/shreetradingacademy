@@ -63,7 +63,8 @@ const HeroSection = () => {
                 view && <div className="w-full flex flex-col lg:flex-row justify-between rounded-2xl bg-btn my-12 p-8 text-white ">
                 <div>
                     <h3 className="font-bold">Accept all cookies</h3>
-                    <p>We use cookies to enhance your experience , Learn more in our <a className="underline" href="/">Cookies policy</a></p>
+                    <p>We use cookies to enhance your experience , Learn more in our </p>
+                    {/* <NavLink to={<CookiesPolicy/>}>he</NavLink> */}
                 </div>
                 <div className="font-extrabold">
                     <button onClick={() => setview(!view)} className="bg-white font-bold text-black px-6 m-1 py-2 rounded-lg hover:bg-black hover:text-white cursor-pointer transition">

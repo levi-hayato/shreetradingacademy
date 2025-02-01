@@ -19,7 +19,7 @@ const Footer = () => {
       {/* Call-to-Action Section */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-5 w-full max-w-screen-lg p-6 bg-gray-800 shadow-lg rounded-lg transform -translate-y-22">
         <div>
-        <h3 className="text-xl font-bold">🌟 Let's Get Started</h3>
+        <h3 className="text-xl font-bold">🌟 Let's Get Started 📊</h3>
         <p>Success in trading isn’t about luck; it's about discipline, strategy, and constant learning.</p>
         </div>
         <button 
