@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from "react";
+import img1 from 'https://desk-on-fire-store.com/assets/assets/gallery/img1.jpg'
+import img2 from 'https://desk-on-fire-store.com/assets/assets/gallery/img2.jpg'
+import img3 from 'https://desk-on-fire-store.com/assets/assets/gallery/img3.jpg'
 
 const Carousel = () => {
   const slides = [
     {
       id: 1,
-      img: "https://desk-on-fire-store.com/assets/assets/gallery/img1.jpg",
+      img: img1,
       text: "Explore the beauty of nature",
     },
     {
       id: 2,
-      img: "https://desk-on-fire-store.com/assets/assets/gallery/img2.jpg",
+      img: img2,
       text: "Technology makes everything possible",
     },
     {
       id: 3,
-      img: "https://desk-on-fire-store.com/assets/assets/gallery/img4.jpg",
+      img: img3,
       text: "The city lights at night",
     },
   ];
