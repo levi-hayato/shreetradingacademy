@@ -1,133 +1,134 @@
-import { NavLink } from "react-router-dom"
-import { NavbarMenu } from "../mockdata/Menuitems"
-import { MdMenu } from "react-icons/md"
-import { useState } from "react"
-import ResponsiveMenu from "./ResponsiveMenu"
-import { BsPerson } from "react-icons/bs"
-import { FaX } from "react-icons/fa6"
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { NavbarMenu } from "../mockdata/Menuitems";
+import { MdMenu } from "react-icons/md";
+import { useState, useContext } from "react";
+import ResponsiveMenu from "./ResponsiveMenu";
+import { BsPerson } from "react-icons/bs";
+import { FaX } from "react-icons/fa6";
+import { FiLogOut, FiSettings, FiUser } from "react-icons/fi";
+import { MdLogin, MdAppRegistration } from "react-icons/md";
+import { auth } from "../firebase/firebase";
+import { UserContext } from "../context/UserContext";
+import CustomButton from "../styles/Button";
 
 const Navbar = () => {
-
     const [open, setOpen] = useState(false);
-    const [openSearch, setOpenSearch] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const { user, setUser } = useContext(UserContext);
+    const location = useLocation();
+
+    const handleLogout = async () => {
+        await auth.signOut();
+        setUser(null);
+    };
+
+    // Define routes where Navbar should be hidden
+    const hideNavbarRoutes = ["/dash", "/dash/sales"];
+    const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
 
     return (
         <>
-            <nav className="font-poppins w-full px-8 bg-bg dark:bg-gray-600">
-                <div className="container  flex justify-between items-center">
+            {!shouldHideNavbar && (
+                <nav className="font-poppins w-full px-8 bg-bg dark:bg-gray-600">
+                    <div className="container flex justify-between items-center">
 
-                    {/* logo Section  */}
-                    <div className="w-60 lg-auto">
-                        <img className="w-30 size-14" src="https://desk-on-fire-store.com/assets/logo.png" alt="" />
-                    </div>
+                        {/* Logo Section */}
+                        <div className="w-60 lg-auto">
+                            <img className="w-30 size-14" src="https://desk-on-fire-store.com/assets/logo.png" alt="Logo" />
+                        </div>
 
-                    {/* menu Section  */}
-                    <div className="hidden lg:block">
-                        <ul className="flex items-center gap-3 text-gray-600 dark:text-white uppercase font-semibold">
-                            {
-                                NavbarMenu.map((item) => {
-                                    return (
+                        {/* Menu Section */}
+                        <div className="hidden lg:block">
+                            <ul className="flex items-center gap-3 text-gray-600 dark:text-white uppercase font-semibold">
+                                {NavbarMenu.map((item) => (
+                                    <li key={item.id}>
+                                        <NavLink className="inline-block py-1 hover:text-btn duration-900" to={item.link}>
+                                            {item.title}
+                                        </NavLink>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
 
-                                        <li key={item.id}>
-                                            <NavLink className='inline-block py-1 hover:text-btn duration-900' to={item.link}>{item.title}</NavLink>
-                                        </li>
-
-                                    )
-                                })
-                            }
-                        </ul>
-                    </div>
-
-
-
-                  
-
-                    {/* mobile hamburger menu Section  */}
-                    <div className="flex items-center">
-                          {/* icon Section  */}
-                    <div className="flex justify-end">
-                        <button className="text-2xl border border-gray-400 dark:text-white  hover:bg-btn hover:text-white hidden lg:flex rounded-full p-1.5 duration-200">
-                            <BsPerson />
-                        </button>
+                        {/* Right Section: Profile & Menu */}
+                        <div className="flex items-center gap-4 relative">
 
 
-
-
-                    </div>
-                        <button onClick={() => setOpenSearch(!openSearch)} className="text-2xl hidden md:flex hover:text-white rounded-full p-1 duration-200">
-                            {
-                                // openSearch ? <CiSearch /> : 
-                                <div className="px-3">
-
-                                    <form className="flex items-center max-w-lg mx-auto">
-                                        <label className="sr-only" for="voice-search">Search</label>
-                                        <div className="relative w-full">
-                                            <div
-                                                class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none"
-                                            >
-                                                <svg
-                                                    viewBox="0 0 21 21"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    aria-hidden="true"
-                                                    className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                >
-                                                    <path
-                                                        d="M11.15 5.6h.01m3.337 1.913h.01m-6.979 0h.01M5.541 11h.01M15 15h2.706a1.957 1.957 0 0 0 1.883-1.325A9 9 0 1 0 2.043 11.89 9.1 9.1 0 0 0 7.2 19.1a8.62 8.62 0 0 0 3.769.9A2.013 2.013 0 0 0 13 18v-.857A2.034 2.034 0 0 1 15 15Z"
-                                                        stroke-width="2"
-                                                        stroke-linejoin="round"
-                                                        stroke-linecap="round"
-                                                        stroke="currentColor"
-                                                    ></path>
-                                                </svg>
-                                            </div>
-                                            <input
-                                                required=""
-                                                placeholder="Search..."
-                                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-40 ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                id="voice-search"
-                                                type="text"
+                            <CustomButton />
+                            {/* User Profile Section / Dropdown */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                                    className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+                                >
+                                    {user ? (
+                                        <div className="flex items-center gap-2">
+                                            <img
+                                                src={user.photo || "https://cdn-icons-png.flaticon.com/512/10337/10337609.png"}
+                                                
+                                                className="w-10 h-10 rounded-full border border-gray-300"
                                             />
-                                            <button
-                                                className="absolute cursor-pointer inset-y-0 end-0 flex items-center pe-3"
-                                                type="button"
-                                            >
-                                               <svg
-                                                viewBox="0 0 20 20"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                aria-hidden="true"
-                                                className="w-4 h-4 me-2"
-                                            >
-                                                <path
-                                                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                                    stroke-width="2"
-                                                    stroke-linejoin="round"
-                                                    stroke-linecap="round"
-                                                    stroke="currentColor"
-                                                ></path></svg>
-                                            </button>
+                                        
                                         </div>
-                                      
-                                    </form>
+                                    ) : (
+                                        <BsPerson className="text-2xl text-gray-700 dark:text-white" />
+                                    )}
 
 
-                                </div>
-                            }
-                        </button>
+                                </button>
 
-                        {
-                            open ? <FaX className="text-2xl lg:hidden dark:text-white" onClick={() => setOpen(!open)} /> : <MdMenu className="text-3xl lg:hidden dark:text-white" onClick={() => setOpen(!open)} />
-                        }
+                                {/* Dropdown Menu */}
+                                {dropdownOpen && (
+                                    <div className="absolute right-0 mt-2 w-50 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+                                        {user ? (
+                                            <ul className="py-2 text-gray-700 dark:text-white">
+                                                <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                                    <FiUser /> {user ? user.name : "Guest"}
+
+                                                </li>
+                                                <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                                    <FiSettings /> Settings
+                                                </li>
+                                                <li
+                                                    onClick={handleLogout}
+                                                    className="px-4 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 cursor-pointer"
+                                                >
+                                                    <FiLogOut /> Logout
+                                                </li>
+                                            </ul>
+                                        ) : (
+                                            <ul className="py-2 text-gray-700 dark:text-white">
+                                                <Link to={"/log"}>
+                                                    <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                                        <MdLogin /> Login
+                                                    </li>
+                                                </Link>
+                                                <Link to={"/register"}>
+                                                    <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                                        <MdAppRegistration /> Register
+                                                    </li>
+                                                </Link>
+                                            </ul>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Mobile Hamburger Menu */}
+                            {open ? (
+                                <FaX className="text-2xl lg:hidden dark:text-white" onClick={() => setOpen(!open)} />
+                            ) : (
+                                <MdMenu className="text-3xl lg:hidden dark:text-white" onClick={() => setOpen(!open)} />
+                            )}
+                        </div>
                     </div>
-                </div>
-            </nav>
+                </nav>
+            )}
 
-            {/* mobile sidebar section  */}
+            {/* Mobile Sidebar Section */}
             <ResponsiveMenu open={open} />
         </>
-    )
+    );
+};
 
-}
-
-export default Navbar
+export default Navbar;

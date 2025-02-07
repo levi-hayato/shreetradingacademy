@@ -4,7 +4,7 @@ const Loader = () => {
     return (
         <div className='w-[90%] h-screen relative flex items-center justify-center'>
 
-            <div class="w-[90%] h-screen gap-1 pt-40 pb-40 relative flex items-center justify-center">
+            <div className="w-[90%] h-screen gap-1 pt-40 pb-40 relative flex items-center justify-center">
 
                 <div className="flex flex-col items-center animate-[bounce_1s_ease-in-out_infinite_0.1s]">
                     
@@ -18,7 +18,7 @@ const Loader = () => {
                 </div>
 
                 <div className="flex flex-col items-center animate-[bounce_1s_ease-in-out_infinite_0.2s]">
-                    
+                
                     <div className="w-1 h-6 bg-red-500"></div>
 
                 
