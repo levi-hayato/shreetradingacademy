@@ -5,15 +5,23 @@ import { FiLogOut } from 'react-icons/fi'
 import { handleLogout } from '../firebase/authContext'
 import StudentsTable from './components/StudentsTable'
 import Sales from './pages/Sales'
+import { useNavigate } from 'react-router-dom'
+import { FaHome } from 'react-icons/fa'
 
 const Dashboard = () => {
+
+  const navigate = useNavigate();
+
   return (
     <div className='pb-30 m3'>
     <div className='flex justify-between'>
     <h1 className="text-2xl font-bold">Dashboard</h1>
     <div className='flex'>
+    <button onClick={() =>{navigate("/")}} className=' bg-white border-1 border-white rounded-2xl w-8 flex justify-center items-center hover:bg-btn transition duration-300 hover:text-white p-1 '><FaHome/></button>
     <button className=' bg-white border-1 border-white rounded-2xl w-8 flex justify-center items-center hover:bg-btn transition duration-300 hover:text-white p-1 '><FaBell/></button>
-    <button onClick={handleLogout} className=' bg-white border-1 border-white rounded-2xl w-8 flex justify-center items-center hover:bg-btn transition duration-300 hover:text-white p-1 mx-3'><FiLogOut/></button>
+    <button onClick={() =>{
+      handleLogout()
+    }} className=' bg-white border-1 border-white rounded-2xl w-8 flex justify-center items-center hover:bg-btn transition duration-300 hover:text-white p-1 mx-3'><FiLogOut/></button>
 
     </div>
     </div>

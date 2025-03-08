@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import HeroSection from '../components/HeroSection'
 import Services from './Services'
-import Gallery from './Gallery'
 import Loader from '../components/Loader'
+import Courses from './Courses'
+import Contact from './Contact'
+import Carousel from '../components/Carousel'
 
 const Home = () => {
 
@@ -27,7 +29,9 @@ const Home = () => {
         <>
           <HeroSection />
           <Services />
-          <Gallery />
+         <Carousel/>
+          <Courses/>
+      <Contact/>
         </>
       }
     </div>

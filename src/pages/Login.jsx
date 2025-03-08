@@ -6,6 +6,7 @@ import { useUser } from "../context/UserContext";
 import { FcGoogle } from "react-icons/fc";
 import { FaUser, FaLock } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [alert, setAlert] = useState({ type: "", message: "", visible: false });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -53,6 +55,7 @@ const Login = () => {
         setUser(userData);
         localStorage.setItem("user", JSON.stringify(userData));
         showAlert("success", "Login successful!");
+        setTimeout(() => navigate("/student"), 2000);
     } catch (error) {
         showAlert("error", "Invalid email or password!");
     }
@@ -92,6 +95,7 @@ const handleGoogleSignIn = async () => {
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
       showAlert("success", "Google Login successful!");
+      setTimeout(() => navigate("/student"), 2000);
   } catch (error) {
       showAlert("error", "An error occurred during Google login!");
   }
@@ -161,3 +165,6 @@ const handleGoogleSignIn = async () => {
 };
 
 export default Login;
+
+
+// if i provide you a zip file of my project can you make it more optimized , faster and more structured for me

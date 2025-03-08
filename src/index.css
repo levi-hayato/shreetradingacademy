@@ -5,11 +5,16 @@
 }
 
 @theme{
+  
+  
+
   --font-poppins: Poppins, sans-serif;
 
   --color-btn: #6254f3;
   --color-bg: #F9F9FF;
 }
+
+
 
 html::-webkit-scrollbar {
   display: none; /* for Chrome, Safari, and Opera */

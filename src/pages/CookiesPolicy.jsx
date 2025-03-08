@@ -103,3 +103,6 @@ const CookiesPolicy = () => {
 };
 
 export default CookiesPolicy;
+
+
+                      

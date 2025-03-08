@@ -68,11 +68,11 @@ export default function StudentsTable() {
         </thead>
         <tbody>
           {filteredStudents.map((student) => (
-            <tr key={student.id} className="text-center">
+            <tr key={student.id} className="text-start">
               <td className=" p-2">{student.name}</td>
               <td className=" p-2">{student.email}</td>
               <td className=" p-2">{student.course}</td>
-              <td className=" p-2">
+              <td className=" p-2 text-center">
                 <button
                   className="text-red-600 hover:text-red-800"
                   onClick={() => handleDelete(student.id)}

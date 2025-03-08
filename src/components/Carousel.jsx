@@ -1,25 +1,32 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import img1 from '../assets/img1.jpg'
 
 const Carousel = () => {
   const slides = [
     {
       id: 1,
-      img: "https://desk-on-fire-store.com/assets/assets/gallery/img1.jpg",
-      text: "Explore the beauty of nature",
+      img: img1,
+      text: "🌿 Explore the beauty of nature",
     },
     {
       id: 2,
-      img: "https://desk-on-fire-store.com/assets/assets/gallery/img2.jpg",
-      text: "Technology makes everything possible",
+      img: img1,
+      text: "💻 Technology makes everything possible",
     },
     {
       id: 3,
-      img: "https://desk-on-fire-store.com/assets/assets/gallery/img4.jpg",
-      text: "The city lights at night",
+      img: img1,
+      text: "🌆 The city lights at night",
     },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Debugging: Log URLs to check if they are correct
+  useEffect(() => {
+    console.log("Current image URL:", slides[currentIndex].img);
+  }, [currentIndex]);
 
   // Auto-slide functionality
   useEffect(() => {
@@ -40,53 +47,64 @@ const Carousel = () => {
   };
 
   return (
-    <div className="h-screen w-[90%] flex items-center justify-center">
-    <div className="relative w-full h-auto mx-auto mt-2 mb-30 overflow-hidden">
-      <div className="flex transition-transform duration-500 ease-in-out transform"
-        style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
-        {slides.map((slide) => (
-          <div key={slide.id} className="w-full flex-shrink-0">
+    <div className="h-screen w-full flex items-center justify-center">
+      <div className="relative w-[90%] max-w-4xl h-[500px] overflow-hidden rounded-lg shadow-lg">
+        <AnimatePresence>
+          <motion.div
+            key={slides[currentIndex].id}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="relative w-full h-full"
+          >
             <img
-              src={slide.img}
+              src={slides[currentIndex].img}
               alt="Slide"
-              className="w-full h-screen object-cover rounded-lg"
+              className="w-full h-full object-cover rounded-lg"
+              onError={(e) => {
+                console.error("Error loading image:", e.target.src);
+                e.target.src = "https://via.placeholder.com/800x500?text=Image+Not+Found";
+              }}
             />
-            {/* <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
-              <h2 className="text-white text-xl font-bold">{slide.text}</h2>
-            </div> */}
-          </div>
-        ))}
+            {/* Text Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <h2 className="text-white text-2xl font-bold text-center px-6">
+                {slides[currentIndex].text}
+              </h2>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Left Button */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-600 transition"
+        >
+          ❮
+        </button>
+
+        {/* Right Button */}
+        <button
+          onClick={nextSlide}
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-600 transition"
+        >
+          ❯
+        </button>
+
+        {/* Dots Indicator */}
+        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              className={`w-3 h-3 rounded-full cursor-pointer transition-all ${
+                index === currentIndex ? "bg-white scale-125" : "bg-gray-500"
+              }`}
+              onClick={() => setCurrentIndex(index)}
+            />
+          ))}
+        </div>
       </div>
-
-      {/* Left Button */}
-      <button
-        onClick={prevSlide}
-        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full hover:bg-gray-600"
-      >
-        ❮
-      </button>
-
-      {/* Right Button */}
-      <button
-        onClick={nextSlide}
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full hover:bg-gray-600"
-      >
-        ❯
-      </button>
-
-      {/* Dots Indicator */}
-      <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            className={`w-3 h-3 rounded-full cursor-pointer ${
-              index === currentIndex ? "bg-white" : "bg-gray-500"
-            }`}
-            onClick={() => setCurrentIndex(index)}
-          />
-        ))}
-      </div>
-    </div>
     </div>
   );
 };
