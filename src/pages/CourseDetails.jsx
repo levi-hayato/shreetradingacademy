@@ -2,8 +2,9 @@ import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { db } from "../firebase/firebase";
 import { doc, getDoc, collection, addDoc } from "firebase/firestore";
-import { FaBook, FaClock, FaCheckCircle, FaMoneyBillWave, FaUser, FaCashRegister } from "react-icons/fa";
+import { FaBook, FaClock, FaCheckCircle, FaMoneyBillWave, FaUser, FaIdBadge, FaIdCard } from "react-icons/fa";
 import { UserContext } from "../context/UserContext";
+import StudentIDCard from "../student/components/StudentIDCard";
 
 export default function CourseDetails() {
   const { id } = useParams();
@@ -12,9 +13,15 @@ export default function CourseDetails() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processingPayment, setProcessingPayment] = useState(false);
-  const [codEnabled, setCodEnabled] = useState(false); // Track Cash on Delivery selection
+  const [codEnabled, setCodEnabled] = useState(false);
 
   useEffect(() => {
+    if (!user) {
+      // Redirect to register if user is not logged in
+      navigate("/register");
+      return;
+    }
+
     const fetchCourse = async () => {
       try {
         const docRef = doc(db, "courses", id);
@@ -31,18 +38,12 @@ export default function CourseDetails() {
     };
 
     fetchCourse();
-  }, [id]);
+  }, [id, user, navigate]);
 
   const handleCOD = async () => {
-    if (!course || !user) {
-      alert("You must be logged in to register.");
-      return;
-    }
-
     setProcessingPayment(true);
 
     try {
-      // Save offline purchase details in Firestore
       await addDoc(collection(db, "offlinepurchase"), {
         uid: user.uid,
         courseId: id,
@@ -65,13 +66,8 @@ export default function CourseDetails() {
   };
 
   const handlePayment = async () => {
-    if (!course || !user) {
-      alert("You must be logged in to register.");
-      return;
-    }
-
     if (codEnabled) {
-      handleCOD(); // Call the COD function if the checkbox is checked
+      handleCOD();
       return;
     }
 
@@ -79,7 +75,7 @@ export default function CourseDetails() {
 
     try {
       const options = {
-        key: "rzp_test_OQAJKOgQg5SpLv", // Replace with your Razorpay Key ID
+        key: "rzp_test_OQAJKOgQg5SpLv",
         amount: course.price * 100,
         currency: "INR",
         name: "Shree Trading",
@@ -101,9 +97,9 @@ export default function CourseDetails() {
           navigate("/student");
         },
         prefill: {
-          name: user.displayName || "User Name",
+          name: user.name || "User Name",
           email: user.email,
-          contact: user.phoneNumber || "9999999999",
+          contact: user.mobile || "+91 XXXXXXXXXX",
         },
         theme: {
           color: "#3399cc",
@@ -130,6 +126,9 @@ export default function CourseDetails() {
   if (!course) {
     return <div className="text-center text-xl font-semibold mt-10 text-red-500">Course not found.</div>;
   }
+
+  const now = new Date();
+const formattedDateTime = now.toLocaleString();
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -162,25 +161,18 @@ export default function CourseDetails() {
       {/* Right Section - User & Payment Cards */}
       <div className="space-y-6">
         {/* User Info Card */}
-        {user && (
-          <div className="bg-white shadow-lg p-6 rounded-lg border border-gray-200">
-            <div className="flex items-center gap-4">
-              <img src={user.photo || "https://via.placeholder.com/100"} alt="User" className="w-16 h-16 rounded-full border shadow-md" />
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{user.name || "User Name"}</h3>
-                <p className="text-gray-600 text-sm">{user.email}</p>
-              </div>
-            </div>
-          </div>
-        )}
+       
+       <StudentIDCard email={user.email} />
 
         {/* Payment Bill Card with COD Option */}
         <div className="bg-white shadow-lg p-6 flex flex-col gap-2 rounded-lg border border-gray-200">
           <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900">
             <FaMoneyBillWave className="text-green-500" /> <p>Payment Summary</p>
           </h3>
-          <p className="mt-4 text-gray-700 flex justify-between"><strong>Course Name:</strong> <span>{course.name}</span></p>
+          <p className="mt-4 text-gray-700 flex justify-between"><strong>Course:</strong> <span>{course.name}</span></p>
+          <p className="mt-4 text-gray-700 flex justify-between"><strong>Course ID:</strong> <span>{course.courseID}</span></p>
           <p className="text-gray-700 flex justify-between"><strong>Duration:</strong> <span>{course.duration}</span></p>
+          <p className="text-gray-700 flex justify-between"><strong>Date:</strong> <span>{formattedDateTime}</span></p>
           <p className="text-lg font-bold text-blue-600 flex justify-between"><strong>Total Amount:</strong> <span>₹{course.price}</span></p>
 
           {/* Cash on Delivery Checkbox */}
@@ -197,6 +189,9 @@ export default function CourseDetails() {
           >
             {processingPayment ? "Processing..." : codEnabled ? "Place Order" : `PAY ₹${course.price}/-`}
           </button>
+          <button onClick={() => {
+            console.log(user);
+          }}>youo</button>
         </div>
       </div>
     </div>

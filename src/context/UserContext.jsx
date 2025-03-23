@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../firebase/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import Loader from '../components/Loader'
+import Loader from '../components/Loader';
 
 export const UserContext = createContext();
 
@@ -18,34 +18,36 @@ export function UserProvider({ children }) {
                     name: authUser.displayName || "User",
                     email: authUser.email,
                     photo: authUser.photoURL || "",
-                    role: null // ✅ Default role set to null to force role update
+                    studentId: "", // Initialize studentId
+                    mobile: "", // Initialize mobile
+                    course: "", // Initialize course
+                    price: "", // Initialize price
+                    duration: "", // Initialize duration
                 };
 
                 try {
-                    // 🔹 Fetch Admin Role First
-                    const adminDoc = await getDoc(doc(db, "admins", authUser.uid));
-                    if (adminDoc.exists()) {
-                        const adminInfo = adminDoc.data();
-                        userData.role = "admin";
-                        userData.name = adminInfo.name || userData.name;
-                        userData.photo = adminInfo.photo || userData.photo;
-                    } else {
-                        // 🔹 If Not Admin, Fetch Student Role
-                        const studentDoc = await getDoc(doc(db, "students", authUser.uid));
-                        if (studentDoc.exists()) {
-                            const studentInfo = studentDoc.data();
-                            userData.role = "student";
-                            userData.name = studentInfo.name || userData.name;
-                            userData.photo = studentInfo.photo || userData.photo;
-                        } else {
-                            userData.role = "guest"; // ✅ Fallback role
-                        }
+                    // Fetch additional user data from Firestore
+                    const studentDoc = await getDoc(doc(db, "students", authUser.uid));
+                    if (studentDoc.exists()) {
+                        const studentInfo = studentDoc.data();
+                        console.log("Fetched Student Data from Firestore:", studentInfo); // Debugging
+
+                        // Update userData with Firestore data
+                        userData.studentId = studentInfo.studentId || ""; // Fetch studentId
+                        userData.mobile = studentInfo.mobile || ""; // Fetch mobile
+                        userData.course = studentInfo.course || ""; // Fetch course
+                        userData.price = studentInfo.price || ""; // Fetch price
+                        userData.duration = studentInfo.duration || ""; // Fetch duration
+                        userData.name = studentInfo.name || userData.name;
+                        userData.photo = studentInfo.photo || userData.photo;
                     }
 
+                    // Save user data to context and localStorage
                     setUser(userData);
-                    localStorage.setItem("user", JSON.stringify(userData)); // ✅ Store updated user data
+                    localStorage.setItem("user", JSON.stringify(userData));
+                    console.log("User Data saved to context and localStorage:", userData); // Debugging
                 } catch (error) {
-                    console.error("Error fetching user role:", error);
+                    console.error("Error fetching user data from Firestore:", error);
                 }
             } else {
                 setUser(null);
@@ -66,7 +68,7 @@ export function UserProvider({ children }) {
 
     return (
         <UserContext.Provider value={{ user, setUser, logout, loading }}>
-            {loading ? <Loader/> : children}
+            {loading ? <Loader /> : children}
         </UserContext.Provider>
     );
 }

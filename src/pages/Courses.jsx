@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { db } from "../firebase/firebase";
 import { collection, getDocs } from "firebase/firestore";
-import { FaBookOpen, FaClock, FaArrowRight, FaCheckCircle, FaRupeeSign } from "react-icons/fa";
+import { FaBookOpen, FaClock, FaCheckCircle, FaRupeeSign } from "react-icons/fa";
 import Loader from "../components/Loader";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion"; // For animations
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -30,18 +31,49 @@ export default function Courses() {
   }, []);
 
   if (loading) {
-    return <div className="text-center"><Loader/></div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader />
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      <h1 className="text-black text-3xl text-center font-extrabold uppercase relative after:block after:w-20 after:h-1 after:bg-indigo-500 after:mt-1 after:mx-auto mb-8">
-        Courses
-      </h1>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {courses.map((course) => (
-          <CourseCard key={course.id} course={course} />
-        ))}
+    <div className="min-h-screen w-full bg-gray-50  relative overflow-hidden">
+      {/* Floating Background Shapes */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="animate-float1 w-40 h-40 bg-indigo-200 rounded-full absolute top-10 left-10 opacity-30"></div>
+        <div className="animate-float2 w-60 h-60 bg-pink-200 rounded-full absolute bottom-20 right-20 opacity-30"></div>
+        <div className="animate-float3 w-80 h-80 bg-purple-200 rounded-full absolute top-1/2 left-1/2 opacity-30"></div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-6 relative z-10">
+        {/* Page Title */}
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-black text-4xl text-center font-extrabold uppercase relative after:block after:w-20 after:h-1 after:bg-indigo-500 after:mt-1 after:mx-auto mb-12"
+        >
+          Courses
+        </motion.h1>
+
+        {/* Course Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3  gap-8">
+          <AnimatePresence>
+            {courses.map((course, index) => (
+              <motion.div
+                key={course.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                exit={{ opacity: 0, y: 20 }}
+              >
+                <CourseCard course={course} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
@@ -52,20 +84,27 @@ const CourseCard = ({ course }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="relative bg-white flex flex-col shadow-lg rounded-xl overflow-hidden transition-transform transform hover:scale-[1.05] hover:shadow-2xl duration-300 border border-gray-200">
-      
+    <motion.div
+      whileHover={{ scale: 1.03 }}
+      transition={{ duration: 0.3 }}
+      className="relative  bg-white/90 backdrop-blur-md flex flex-col shadow-lg rounded-xl overflow-hidden transition-transform transform hover:shadow-2xl duration-300 border border-gray-200"
+    >
       {/* Course Banner */}
       <div className="relative">
-        <img src={course.banner} alt={course.name} className="w-full h-52 object-cover rounded-t-xl" />
+        <img
+          src={course.banner}
+          alt={course.name}
+          className="w-full h-52 object-cover rounded-t-xl"
+        />
         <div className="absolute top-3 left-3 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-xs font-semibold">
           <FaClock className="inline-block mr-1" /> {course.duration}
         </div>
       </div>
 
-      <div className="p-6 bg-white rounded-b-xl">
+      <div className="p-6 bg-white/90 backdrop-blur-md rounded-b-xl">
         {/* Course Name */}
         <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-        {course.name}
+         {course.name}
         </h3>
 
         {/* Course Description */}
@@ -82,7 +121,9 @@ const CourseCard = ({ course }) => {
                 <FaCheckCircle className="text-green-500" /> {feature}
               </li>
             ))}
-            {course.features.length > 3 && <li className="text-sm text-gray-500">+ More...</li>}
+            {course.features.length > 3 && (
+              <li className="text-sm text-gray-500">+ More...</li>
+            )}
           </ul>
         </div>
 
@@ -99,6 +140,6 @@ const CourseCard = ({ course }) => {
           Register
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 };

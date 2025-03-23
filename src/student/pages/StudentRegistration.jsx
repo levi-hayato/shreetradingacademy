@@ -46,11 +46,22 @@ const StudentRegistration = () => {
             setCourses(coursesData);
         };
         fetchCourses();
-
-
     }, []);
 
-    // Handle Course Selection
+    const generateStudentId = async () => {
+        let studentId;
+        let isUnique = false;
+
+        while (!isUnique) {
+            studentId = Math.floor(100000 + Math.random() * 900000).toString();
+            const q = query(collection(db, "students"), where("studentId", "==", studentId));
+            const querySnapshot = await getDocs(q);
+            isUnique = querySnapshot.empty;
+        }
+
+        return studentId;
+    };
+
     const handleCourseChange = (e) => {
         const selectedCourse = courses.find(course => course.id === e.target.value);
         if (selectedCourse) {
@@ -63,7 +74,6 @@ const StudentRegistration = () => {
         }
     };
 
-    // Handle Image Selection
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -81,12 +91,10 @@ const StudentRegistration = () => {
         setShowCropper(true);
     };
 
-    // Capture cropped area
     const handleCropComplete = (_, croppedAreaPixels) => {
         setCroppedAreaPixels(croppedAreaPixels);
     };
 
-    // Save cropped image
     const handleCropSave = async () => {
         try {
             const croppedImg = await getCroppedImg(imageFile, croppedAreaPixels);
@@ -97,7 +105,6 @@ const StudentRegistration = () => {
         }
     };
 
-    // Handle Form Submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -109,6 +116,7 @@ const StudentRegistration = () => {
         }
 
         try {
+            // Check if email is already registered
             const q = query(collection(db, "students"), where("email", "==", student.email));
             const querySnapshot = await getDocs(q);
             if (!querySnapshot.empty) {
@@ -116,6 +124,9 @@ const StudentRegistration = () => {
                 setLoading(false);
                 return;
             }
+
+            // Generate a unique 6-digit Student ID
+            const studentId = await generateStudentId();
 
             let imageUrl = "";
             if (croppedImage) {
@@ -130,9 +141,10 @@ const StudentRegistration = () => {
                 photoURL: imageUrl,
             });
 
+            // Save Student Data in Firestore
             await addDoc(collection(db, "students"), {
                 uid: user.uid,
-             
+                studentId, // Save studentId to Firestore
                 name: student.name,
                 email: student.email,
                 course: student.course,
@@ -140,19 +152,30 @@ const StudentRegistration = () => {
                 price: student.price,
                 duration: student.duration,
                 photo: imageUrl,
-             
+                dateJoined: new Date(),
             });
 
+            // Update User Context
             setUser({
                 uid: user.uid,
-                mobile: student.mobile,
+                studentId, // Save studentId to context
                 name: student.name,
                 email: student.email,
                 course: student.course,
+                mobile: student.mobile,
                 photo: imageUrl,
             });
 
-            localStorage.setItem("user", JSON.stringify({ uid: user.uid, mobile: student.mobile, name: student.name, email: student.email, photo: imageUrl }));
+            // Save to Local Storage
+            localStorage.setItem("user", JSON.stringify({
+                uid: user.uid,
+                studentId, // Save studentId to localStorage
+                name: student.name,
+                email: student.email,
+                course: student.course,
+                mobile: student.mobile,
+                photo: imageUrl,
+            }));
 
             showAlert("success", "Registration successful!");
             setTimeout(() => navigate("/student"), 2000);
@@ -166,17 +189,8 @@ const StudentRegistration = () => {
     return (
         <div className="m-10 flex justify-center items-center">
             <div className="max-w-md mx-3 px-9 py-9 bg-white rounded-lg shadow-lg relative">
-                {alert?.visible && (
-                    <div className={`absolute top-0 left-0 right-0 mx-auto p-3 text-white rounded flex items-center justify-between transition-opacity duration-300 ${alert.type === "success" ? "bg-green-500" : "bg-red-500"
-                        }`}>
-                        <span>{alert.message}</span>
-                        <IoClose className="cursor-pointer" onClick={() => setAlert(null)} />
-                    </div>
-                )}
-
                 {/* Cropper Modal */}
                 {showCropper && (
-
                     <div className="absolute inset-0 bg-white p-4 rounded-lg bg-opacity-75 flex flex-col items-center justify-center z-50">
                         <h2 className="text-lg font-semibold mb-3">Crop Your Image</h2>
                         <div className="relative w-[300px] h-[300px]">
@@ -195,24 +209,21 @@ const StudentRegistration = () => {
                             <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleCropSave}>Crop & Save</button>
                         </div>
                     </div>
-
                 )}
 
                 <h2 className="text-xl font-semibold mb-4 text-center">Student Registration</h2>
                 <form className="space-y-4 flex flex-col justify-center" onSubmit={handleSubmit}>
-
                     {/* Profile Image Upload */}
-                    <div className="border-2 w-30 self-center border-dashed border-gray-300 p-4 rounded-full text-center cursor-pointer hover:border-blue-500 transition">
+                    <div className="border-2 w-30 self-center border-dashed border-gray-300 p-2 rounded-full text-center cursor-pointer hover:border-blue-500 transition">
                         <label className="block text-gray-600 font-medium cursor-pointer">
-                            <IoImage className="text-blue-500 mx-auto text-4xl mb-2" />
+                            
                             {croppedImage ? (
-                                <img src={croppedImage} alt="Preview" className="w-24 h-24 object-cover rounded mx-auto mt-2 border" />
-                            ) : "Upload Profile"}
+                                <img src={croppedImage} alt="Preview" className="w-24 h-24  object-cover rounded-full border" />
+                            ) : <IoImage className="text-blue-500 mx-auto text-4xl mb-2" />}
                             <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                         </label>
                     </div>
-
-                
+         
 
                     {/* Student Name */}
                     <div className="flex items-center border p-2 rounded">
@@ -226,13 +237,13 @@ const StudentRegistration = () => {
                         <input type="email" placeholder="Student Email" className="w-full outline-none" required value={student.email} onChange={(e) => setStudent({ ...student, email: e.target.value })} />
                     </div>
 
-{/* Mobile Number */}
-<div className="flex items-center border p-2 rounded">
-    <IoCall className="text-gray-500 mr-2" />
-    <input type="tel" placeholder="Mobile Number" className="w-full outline-none" required 
-        value={student.mobile} 
-        onChange={(e) => setStudent({ ...student, mobile: e.target.value })} />
-</div>
+                    {/* Mobile Number */}
+                    <div className="flex items-center border p-2 rounded">
+                        <IoCall className="text-gray-500 mr-2" />
+                        <input type="tel" placeholder="Mobile Number" className="w-full outline-none" required
+                            value={student.mobile}
+                            onChange={(e) => setStudent({ ...student, mobile: e.target.value })} />
+                    </div>
 
                     {/* Course Selection */}
                     <div className="flex items-center border p-2 rounded">

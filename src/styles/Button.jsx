@@ -1,9 +1,14 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 
 const CustomButton = () => {
+ 
+  const navigate = useNavigate();
+
   return (
-    <button
-      className="overflow-hidden w-32 p-1 h-10 bg-btn text-white border-none rounded-md text-xl font-bold cursor-pointer relative z-10 group"
+ 
+    <button onClick={() => {navigate("/courses")}}
+      className="overflow-hidden md:flex hidden w-32 p-1 h-10 bg-btn text-white border-none rounded-md text-xl font-bold cursor-pointer relative z-10 group"
     >
       Let's join  
       <span
@@ -20,6 +25,7 @@ const CustomButton = () => {
         >Explore!</span
       >
     </button>
+
   )
 }
 

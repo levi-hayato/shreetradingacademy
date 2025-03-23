@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaBook, FaMoneyBill, FaSignOutAlt, FaBars } from "react-icons/fa";
+import StudentIDCard from "./components/StudentIDCard";
 
 function StudentDashboard() {
   const { user, logout } = useUser();
@@ -42,18 +43,19 @@ function StudentDashboard() {
             onClick={handleLogout}
             className="flex items-center gap-3 text-lg hover:text-gray-300 focus:outline-none"
           >
+          
             <FaSignOutAlt /> {isSidebarOpen && "Logout"}
           </button>
         </nav>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 bg-gray-100">
-        <h2 className="text-3xl font-bold text-gray-800">Welcome, {user?.name}!</h2>
-        <p className="text-gray-600 mt-2">{user?.email}</p>
-      </div>
+     
+       <div className="flex justify-center items-center w-full"><StudentIDCard email={user.email}/></div>
     </div>
   );
 }
 
 export default StudentDashboard;
+
+
