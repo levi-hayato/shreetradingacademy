@@ -10,6 +10,7 @@ import Cropper from "react-easy-crop";
 import { getCroppedImg } from "../../utils/cropImage";
 import { IoClose, IoMail, IoLockClosed, IoPerson, IoImage, IoKey, IoCalendar, IoCall } from "react-icons/io5";
 import { FaBookOpen, FaRupeeSign } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 const StudentRegistration = () => {
     const { setUser } = useContext(UserContext);
@@ -116,7 +117,6 @@ const StudentRegistration = () => {
         }
 
         try {
-            // Check if email is already registered
             const q = query(collection(db, "students"), where("email", "==", student.email));
             const querySnapshot = await getDocs(q);
             if (!querySnapshot.empty) {
@@ -125,7 +125,6 @@ const StudentRegistration = () => {
                 return;
             }
 
-            // Generate a unique 6-digit Student ID
             const studentId = await generateStudentId();
 
             let imageUrl = "";
@@ -141,10 +140,9 @@ const StudentRegistration = () => {
                 photoURL: imageUrl,
             });
 
-            // Save Student Data in Firestore
             await addDoc(collection(db, "students"), {
                 uid: user.uid,
-                studentId, // Save studentId to Firestore
+                studentId,
                 name: student.name,
                 email: student.email,
                 course: student.course,
@@ -155,10 +153,9 @@ const StudentRegistration = () => {
                 dateJoined: new Date(),
             });
 
-            // Update User Context
             setUser({
                 uid: user.uid,
-                studentId, // Save studentId to context
+                studentId,
                 name: student.name,
                 email: student.email,
                 course: student.course,
@@ -166,10 +163,9 @@ const StudentRegistration = () => {
                 photo: imageUrl,
             });
 
-            // Save to Local Storage
             localStorage.setItem("user", JSON.stringify({
                 uid: user.uid,
-                studentId, // Save studentId to localStorage
+                studentId,
                 name: student.name,
                 email: student.email,
                 course: student.course,
@@ -187,68 +183,102 @@ const StudentRegistration = () => {
     };
 
     return (
-        <div className="m-10 flex justify-center items-center">
-            <div className="max-w-md mx-3 px-9 py-9 bg-white rounded-lg shadow-lg relative">
-                {/* Cropper Modal */}
-                {showCropper && (
-                    <div className="absolute inset-0 bg-white p-4 rounded-lg bg-opacity-75 flex flex-col items-center justify-center z-50">
-                        <h2 className="text-lg font-semibold mb-3">Crop Your Image</h2>
-                        <div className="relative w-[300px] h-[300px]">
-                            <Cropper
-                                image={imageFile}
-                                crop={crop}
-                                zoom={zoom}
-                                aspect={1}
-                                onCropChange={setCrop}
-                                onZoomChange={setZoom}
-                                onCropComplete={handleCropComplete}
-                            />
-                        </div>
-                        <div className="flex justify-between ga mt-4">
-                            <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => setShowCropper(false)}>Cancel</button>
-                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleCropSave}>Crop & Save</button>
+        <div className="flex flex-col md:flex-row justify-center items-center min-h-screen bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
+            {/* Left Section - Registration Form */}
+            <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                className="w-full md:w-1/1 justify-around bg-white flex rounded-lg shadow-lg p-8 mx-4"
+            >
+              <div>
+                  {/* Cropper Modal */}
+                  {showCropper && (
+                    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg">
+                            <h2 className="text-lg font-semibold mb-4">Crop Your Image</h2>
+                            <div className="relative w-64 h-64">
+                                <Cropper
+                                    image={imageFile}
+                                    crop={crop}
+                                    zoom={zoom}
+                                    aspect={1}
+                                    onCropChange={setCrop}
+                                    onZoomChange={setZoom}
+                                    onCropComplete={handleCropComplete}
+                                />
+                            </div>
+                            <div className="flex justify-between gap-4 mt-4">
+                                <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => setShowCropper(false)}>Cancel</button>
+                                <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleCropSave}>Crop & Save</button>
+                            </div>
                         </div>
                     </div>
                 )}
 
-                <h2 className="text-xl font-semibold mb-4 text-center">Student Registration</h2>
-                <form className="space-y-4 flex flex-col justify-center" onSubmit={handleSubmit}>
+                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Student Registration</h2>
+                <form className="space-y-4" onSubmit={handleSubmit}>
                     {/* Profile Image Upload */}
-                    <div className="border-2 w-30 self-center border-dashed border-gray-300 p-2 rounded-full text-center cursor-pointer hover:border-blue-500 transition">
-                        <label className="block text-gray-600 font-medium cursor-pointer">
-                            
+                    <div className="flex justify-center">
+                        <label className="cursor-pointer">
                             {croppedImage ? (
-                                <img src={croppedImage} alt="Preview" className="w-24 h-24  object-cover rounded-full border" />
-                            ) : <IoImage className="text-blue-500 mx-auto text-4xl mb-2" />}
+                                <img src={croppedImage} alt="Preview" className="w-24 h-24 object-cover rounded-full border-2 border-blue-500" />
+                            ) : (
+                                <div className="w-24 h-24 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 hover:border-blue-500 transition">
+                                    <IoImage className="text-blue-500 text-3xl" />
+                                </div>
+                            )}
                             <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                         </label>
                     </div>
-         
 
                     {/* Student Name */}
-                    <div className="flex items-center border p-2 rounded">
+                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition">
                         <IoPerson className="text-gray-500 mr-2" />
-                        <input type="text" placeholder="Student Name" className="w-full outline-none" required value={student.name} onChange={(e) => setStudent({ ...student, name: e.target.value })} />
+                        <input
+                            type="text"
+                            placeholder="Student Name"
+                            className="w-full outline-none"
+                            required
+                            value={student.name}
+                            onChange={(e) => setStudent({ ...student, name: e.target.value })}
+                        />
                     </div>
 
                     {/* Student Email */}
-                    <div className="flex items-center border p-2 rounded">
+                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition">
                         <IoMail className="text-gray-500 mr-2" />
-                        <input type="email" placeholder="Student Email" className="w-full outline-none" required value={student.email} onChange={(e) => setStudent({ ...student, email: e.target.value })} />
+                        <input
+                            type="email"
+                            placeholder="Student Email"
+                            className="w-full outline-none"
+                            required
+                            value={student.email}
+                            onChange={(e) => setStudent({ ...student, email: e.target.value })}
+                        />
                     </div>
 
                     {/* Mobile Number */}
-                    <div className="flex items-center border p-2 rounded">
+                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition">
                         <IoCall className="text-gray-500 mr-2" />
-                        <input type="tel" placeholder="Mobile Number" className="w-full outline-none" required
+                        <input
+                            type="tel"
+                            placeholder="Mobile Number"
+                            className="w-full outline-none"
+                            required
                             value={student.mobile}
-                            onChange={(e) => setStudent({ ...student, mobile: e.target.value })} />
+                            onChange={(e) => setStudent({ ...student, mobile: e.target.value })}
+                        />
                     </div>
 
                     {/* Course Selection */}
-                    <div className="flex items-center border p-2 rounded">
+                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition">
                         <FaBookOpen className="text-gray-500 mr-2" />
-                        <select className="w-full outline-none" onChange={handleCourseChange}>
+                        <select
+                            className="w-full outline-none"
+                            onChange={handleCourseChange}
+                            required
+                        >
                             <option value="">Select a Course</option>
                             {courses.map((course) => (
                                 <option key={course.id} value={course.id}>
@@ -258,22 +288,72 @@ const StudentRegistration = () => {
                         </select>
                     </div>
 
-                    {/* Password & Confirm Password */}
-                    <div className="flex items-center border p-2 rounded">
+                    {/* Password */}
+                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition">
                         <IoLockClosed className="text-gray-500 mr-2" />
-                        <input type="password" placeholder="Password" className="w-full outline-none" required value={student.password} onChange={(e) => setStudent({ ...student, password: e.target.value })} />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            className="w-full outline-none"
+                            required
+                            value={student.password}
+                            onChange={(e) => setStudent({ ...student, password: e.target.value })}
+                        />
                     </div>
 
-                    <div className="flex items-center border p-2 rounded">
+                    {/* Confirm Password */}
+                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition">
                         <IoKey className="text-gray-500 mr-2" />
-                        <input type="password" placeholder="Confirm Password" className="w-full outline-none" required value={student.confirmPassword} onChange={(e) => setStudent({ ...student, confirmPassword: e.target.value })} />
+                        <input
+                            type="password"
+                            placeholder="Confirm Password"
+                            className="w-full outline-none"
+                            required
+                            value={student.confirmPassword}
+                            onChange={(e) => setStudent({ ...student, confirmPassword: e.target.value })}
+                        />
                     </div>
 
-                    <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600" disabled={loading}>
+                    {/* Submit Button */}
+                    <button
+                        type="submit"
+                        className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition"
+                        disabled={loading}
+                    >
                         {loading ? "Registering..." : "Register"}
                     </button>
                 </form>
-            </div>
+              </div>
+
+               {/* Right Section - Shape Animation */}
+            <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="hidden md:flex items-center justify-center"
+            >
+                <div className="relative w-96 h-96">
+                    {/* Animated Shapes */}
+                    <motion.div
+                        className="absolute w-100 h-100 bg-blue-400 rounded-full"
+                        animate={{ y: [0, -20, 0], rotate: [0, 360] }}
+                        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <motion.div
+                        className="absolute w-80 h-80 bg-indigo-400 rounded-lg"
+                        animate={{ x: [0, 20, 0], rotate: [0, -360] }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <motion.div
+                        className="absolute w-60 h-60 bg-purple-400 rounded-full"
+                        animate={{ y: [0, 20, 0], rotate: [0, 360] }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                </div>
+            </motion.div>
+            </motion.div>
+
+           
         </div>
     );
 };
