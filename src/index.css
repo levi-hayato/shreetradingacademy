@@ -106,6 +106,26 @@ html{
   background-color:#F9FAFB;
 }
 
+/* Enable dark mode using class strategy */
+/* This replaces the darkMode: 'class' in tailwind.config.js */
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+/* Custom dark mode styles */
+.dark body {
+  @apply bg-gray-900 text-gray-100;
+}
+
+/* Add any other dark mode overrides you need */
+.dark .custom-element {
+  @apply bg-gray-800 text-white;
+}
+
 .container{
    align-self: center;
    padding: 1rem;

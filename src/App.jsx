@@ -26,6 +26,10 @@ import { AlertProvider } from "./context/AlertContext";
 import CourseDetails from "./pages/CourseDetails";
 import { BsMessenger } from "react-icons/bs";
 import Payments from "./admin/pages/Payments";
+import MessagesPage from "./admin/pages/Messages";
+import StudentsTable from "./admin/components/StudentsTable";
+import AdminsTable from "./admin/components/AdminsTable";
+import SettingsPage from "./admin/pages/SettingPage";
 
 function App() {
   return (
@@ -43,7 +47,7 @@ function App() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/register" element={<StudentRegistration />} />
           <Route path="/student" element={<StudentDashboard />} />
-          <Route path="/log" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<AdminLogin />} />
 
           {/* 🔹 Restrict /dash to Admins Only */}
@@ -57,12 +61,12 @@ function App() {
                     <SidebarItem icon={<FaChartBar />} text="Sales" to={'/dash/sales'} />
                     <SidebarItem icon={<FaUsers />} text="Manage" dropdownItems={[
                       { text: "Courses", to: "/dash/manage", icon: <FaUsers /> },
-                      { text: "Admins", to: "/users/admins", icon: <FaPersonCircleCheck /> },
-                      { text: "Students", to: "/users/students", icon: <FaChild /> },
+                      { text: "Admins", to: "/dash/admins", icon: <FaPersonCircleCheck /> },
+                      { text: "Students", to: "/dash/students", icon: <FaChild /> },
                     ]} />
                     <SidebarItem icon={<FaMoneyBill1 />} text="Payments" to={'/dash/payments'} alert />
-                    <SidebarItem icon={<BsMessenger />} text="Messages" to={'/settings'} alert />
-                    <SidebarItem icon={<FaCog />} text="Settings" to={'/settings'} alert />
+                    <SidebarItem icon={<BsMessenger />} text="Messages" to={'/dash/message'} alert />
+                    <SidebarItem icon={<FaCog />} text="Settings" to={'/dash                                                                                                                                                                            /settings'} alert />
                   </Sidebar>
                   <div className="flex-1 p-6 overflow-y-auto">
                     <Routes>
@@ -71,6 +75,10 @@ function App() {
                       <Route path="/users" element={<Users />} />
                       <Route path="/payments" element={<Payments />} />
                       <Route path="/manage" element={<AddCourse />} />
+                      <Route path="/message" element={<MessagesPage/>} />
+                      <Route path="/students" element={<StudentsTable/>} />
+                      <Route path="/admins" element={<AdminsTable/>} />
+                      <Route path="/settings" element={<SettingsPage/>} />
                     </Routes>
                   </div>
                 </div>

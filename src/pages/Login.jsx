@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { db, auth, googleProvider } from "../firebase/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
 import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { useUser } from "../context/UserContext";
 import { FcGoogle } from "react-icons/fc";
@@ -16,9 +16,29 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
     const [alert, setAlert] = useState({ type: "", message: "", visible: false });
+    const [showPopup, setShowPopup] = useState(false);
+    const [courses, setCourses] = useState([]);
+    const [additionalDetails, setAdditionalDetails] = useState({
+        mobile: "",
+        course: "",
+        duration: "",
+        joiningDate: new Date().toISOString().split("T")[0],
+    });
     const navigate = useNavigate();
 
     useEffect(() => {
+        const fetchCourses = async () => {
+            const coursesCollection = collection(db, "courses");
+            const coursesSnapshot = await getDocs(coursesCollection);
+            const coursesList = coursesSnapshot.docs.map(doc => ({
+                name: doc.data().name,
+                duration: doc.data().duration,
+            }));
+            setCourses(coursesList);
+        };
+
+        fetchCourses();
+
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
             setUser(JSON.parse(storedUser));
@@ -101,26 +121,14 @@ const Login = () => {
                 userData.course = userInfo.course || "";
                 userData.price = userInfo.price || "";
                 userData.duration = userInfo.duration || "";
+                setUser(userData);
+                localStorage.setItem("user", JSON.stringify(userData));
+                showAlert("success", "Google Login successful!");
+                setTimeout(() => navigate("/student"), 2000);
             } else {
-                const newStudentId = Math.floor(100000 + Math.random() * 900000).toString();
-                await setDoc(doc(db, "students", user.uid), {
-                    uid: user.uid,
-                    name: user.displayName,
-                    email: user.email,
-                    photo: user.photoURL,
-                    studentId: newStudentId,
-                    mobile: "",
-                    course: "",
-                    price: "",
-                    duration: "",
-                });
-                userData.studentId = newStudentId;
+                setShowPopup(true);
+                setUser(userData);
             }
-
-            setUser(userData);
-            localStorage.setItem("user", JSON.stringify(userData));
-            showAlert("success", "Google Login successful!");
-            setTimeout(() => navigate("/student"), 2000);
         } catch (error) {
             console.error("Google Login Error:", error);
             localStorage.removeItem("user");
@@ -129,88 +137,164 @@ const Login = () => {
         setGoogleLoading(false);
     };
 
+    const handleCourseChange = (e) => {
+        const selectedCourse = courses.find(course => course.name === e.target.value);
+        setAdditionalDetails({
+            ...additionalDetails,
+            course: selectedCourse.name,
+            duration: selectedCourse.duration,
+        });
+    };
+
+    const handleAdditionalDetailsSubmit = async (e) => {
+        e.preventDefault();
+        const user = auth.currentUser;
+        const newStudentId = Math.floor(100000 + Math.random() * 900000).toString();
+        const userData = {
+            ...additionalDetails,
+            uid: user.uid,
+            name: user.displayName,
+            email: user.email,
+            photo: user.photoURL,
+            studentId: newStudentId,
+        };
+
+        await setDoc(doc(db, "students", user.uid), userData);
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        showAlert("success", "Google Login successful!");
+        setShowPopup(false);
+        setTimeout(() => navigate("/student"), 2000);
+    };
+
     return (
         <div className="flex flex-col md:flex-row p-4 md:p-0 m-auto h-screen justify-center items-center gap-10 md:gap-20 bg-gradient-to-r from-blue-50 to-indigo-50">
             {/* Left Section - Login Form */}
-
-<motion.div
+            <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 className="w-full flex md:w-180 gap-4 justify-around p-8 bg-white rounded-lg shadow-lg relative"
             >
                 <div>
-                {alert.visible && (
-                    <div className={`absolute top-0 left-0 right-0 mx-auto p-3 text-white rounded flex items-center justify-between transition-opacity duration-300 ${alert.type === "success" ? "bg-green-500" : "bg-red-500"
-                        }`}>
-                        <span>{alert.message}</span>
-                        <IoClose className="cursor-pointer" onClick={() => setAlert({ ...alert, visible: false })} />
-                    </div>
-                )}
-
-                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6 uppercase">Login</h2>
-
-                <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition-all">
-                        <FaUser className="text-gray-500 mx-2" />
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            className="w-full outline-none"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition-all">
-                        <FaLock className="text-gray-500 mx-2" />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            className="w-full outline-none"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-500 text-white font-semibold py-2 rounded-lg flex items-center justify-center gap-2 transition-all hover:bg-blue-600"
-                        disabled={loading}
-                    >
-                        {loading ? <span className="animate-spin w-5 h-5 border-4 border-white border-t-transparent rounded-full"></span> : "Login"}
-                    </button>
-                </form>
-
-                <div className="mt-4 text-center text-gray-500 text-sm">or</div>
-
-                <button
-                    onClick={handleGoogleSignIn}
-                    className="w-full bg-gray-100 border border-gray-300 text-gray-700 py-2 rounded-lg flex items-center justify-center gap-2 transition-all hover:bg-gray-200 mt-4"
-                    disabled={googleLoading}
-                >
-                    {googleLoading ? (
-                        <span className="animate-spin w-5 h-5 border-4 border-black border-t-transparent rounded-full"></span>
-                    ) : (
-                        <FcGoogle size={20} />
+                    {alert.visible && (
+                        <div className={`absolute top-0 left-0 right-0 mx-auto p-3 text-white rounded flex items-center justify-between transition-opacity duration-300 ${alert.type === "success" ? "bg-green-500" : "bg-red-500"
+                            }`}>
+                            <span>{alert.message}</span>
+                            <IoClose className="cursor-pointer" onClick={() => setAlert({ ...alert, visible: false })} />
+                        </div>
                     )}
-                    {googleLoading ? "Signing in..." : "Sign in with Google"}
-                </button>
+
+                    <h2 className="text-2xl font-bold text-center text-gray-800 mb-6 uppercase">Login</h2>
+
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition-all">
+                            <FaUser className="text-gray-500 mx-2" />
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                className="w-full outline-none"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition-all">
+                            <FaLock className="text-gray-500 mx-2" />
+                            <input
+                                type="password"
+                                placeholder="Password"
+                                className="w-full outline-none"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-500 text-white font-semibold py-2 rounded-lg flex items-center justify-center gap-2 transition-all hover:bg-blue-600"
+                            disabled={loading}
+                        >
+                            {loading ? <span className="animate-spin w-5 h-5 border-4 border-white border-t-transparent rounded-full"></span> : "Login"}
+                        </button>
+                    </form>
+
+                    <div className="mt-4 text-center text-gray-500 text-sm">or</div>
+
+                    <button
+                        onClick={handleGoogleSignIn}
+                        className="w-full bg-gray-100 border border-gray-300 text-gray-700 py-2 rounded-lg flex items-center justify-center gap-2 transition-all hover:bg-gray-200 mt-4"
+                        disabled={googleLoading}
+                    >
+                        {googleLoading ? (
+                            <span className="animate-spin w-5 h-5 border-4 border-black border-t-transparent rounded-full"></span>
+                        ) : (
+                            <FcGoogle size={20} />
+                        )}
+                        {googleLoading ? "Signing in..." : "Sign in with Google"}
+                    </button>
                 </div>
 
-                  {/* Right Section - Animated Graphic */}
-            <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="hidden md:flex items-center justify-center"
-            >
-                <div className="w-60 h-60 bg-gradient-to-r from-indigo-500 to-blue-400 rounded-full animate-morph shadow-lg"></div>
-            </motion.div>
+                {/* Right Section - Animated Graphic */}
+                <motion.div
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="hidden md:flex items-center justify-center"
+                >
+                    <div className="w-60 h-60 bg-gradient-to-r from-indigo-500 to-blue-400 rounded-full animate-morph shadow-lg"></div>
+                </motion.div>
             </motion.div>
 
-
-          
+            {showPopup && (
+                <div className="fixed inset-0 bg-transparent backdrop-blur-md bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white p-8 rounded-lg shadow-lg">
+                        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Additional Details</h2>
+                        <form onSubmit={handleAdditionalDetailsSubmit} className="space-y-4">
+                            <div className="flex items-center border border-gray-300 p-2 rounded-lg">
+                                <input
+                                    type="text"
+                                    placeholder="Mobile"
+                                    className="w-full outline-none"
+                                    value={additionalDetails.mobile}
+                                    onChange={(e) => setAdditionalDetails({ ...additionalDetails, mobile: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="flex items-center border border-gray-300 p-2 rounded-lg">
+                                <select
+                                    className="w-full outline-none"
+                                    value={additionalDetails.course}
+                                    onChange={handleCourseChange}
+                                    required
+                                >
+                                    <option value="" disabled>Select Course</option>
+                                    {courses.map((course, index) => (
+                                        <option key={index} value={course.name}>{course.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex flex-col border border-gray-300 p-2 rounded-lg">
+                                <label htmlFor="joiningDate" className="text-gray-500">Joining Date</label>
+                                <input
+                                    type="date"
+                                    placeholder="Joining Date"
+                                    className="w-full outline-none"
+                                    value={additionalDetails.joiningDate}
+                                    onChange={(e) => setAdditionalDetails({ ...additionalDetails, joiningDate: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-blue-500 text-white font-semibold py-2 rounded-lg flex items-center justify-center gap-2 transition-all hover:bg-blue-600"
+                            >
+                                Submit
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -54,7 +54,7 @@ const StudentIDCard = ({ email }) => {
     }
 
     return (
-        <div className="flex justify-center items-center  relative">
+        <div className="flex min-w-80 justify-center items-center  relative">
                    
 
                  {/* Background Div with 40% Opacity */}

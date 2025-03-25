@@ -5,7 +5,7 @@ import { useState, useContext, useEffect } from "react";
 import ResponsiveMenu from "./ResponsiveMenu";
 import { BsPerson } from "react-icons/bs";
 import {  FaX } from "react-icons/fa6";
-import { FiBell, FiLogOut, FiSettings, FiUser } from "react-icons/fi";
+import { FiBell, FiChevronRight, FiLogOut, FiSettings, FiUser } from "react-icons/fi";
 import { MdLogin, MdAppRegistration } from "react-icons/md";
 import { FaRegBell, FaUserShield } from "react-icons/fa";
 import { db, auth } from "../firebase/firebase";
@@ -50,7 +50,7 @@ const Navbar = () => {
     };
 
     // Define routes where Navbar should be hidden
-    const hideNavbarRoutes = ["/dash", "/dash/sales", "/dash/manage", "/dash/payments"];
+    const hideNavbarRoutes = ["/student", "/dash", "/dash/sales", "/dash/manage", "/dash/payments" , "/dash/message" , "/dash/students" , "/dash/admins" , "/dash/settings"];
     const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
 
     return (
@@ -109,49 +109,100 @@ const Navbar = () => {
 
                                 
 
-                                {/* Dropdown Menu */}
-                                {dropdownOpen && (
-                                    <div className="absolute right-0 mt-2 w-56 z-10 bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
-                                        {user ? (
-                                            <ul className="py-2 text-gray-700 dark:text-white">
-                                                <li
-                                                    className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 cursor-pointer transition-all duration-300"
-                                                    onClick={handleUserClick} // Clicking redirects based on role
-                                                >
-                                                    <FiUser /> {user.name || "Guest"}
-                                                </li>
-                                                <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-all duration-300">
-                                                    <FiSettings /> Settings
-                                                </li>
-                                                <li
-                                                    onClick={handleLogout}
-                                                    className="px-4 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 cursor-pointer transition-all duration-300"
-                                                >
-                                                    <FiLogOut /> Logout
-                                                </li>
-                                            </ul>
-                                        ) : (
-                                            <ul className="py-2 text-gray-700 uppercase font-[5px] dark:text-white">
-                                                <Link to={"/log"}>
-                                                    <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-all duration-300">
-                                                        <MdLogin /> Login
-                                                    </li>
-                                                </Link>
-                                                <Link to={"/register"}>
-                                                    <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-all duration-300">
-                                                        <MdAppRegistration /> Register
-                                                    </li>
-                                                </Link>
-                                                <Link to={"/admin"}>
-                                                    <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-all duration-300">
-                                                        <FaUserShield /> Admin
-                                                    </li>
-                                                </Link>
-                                            </ul>
-                                        )}
-                                    </div>
-                                )}
-                               
+                              {/* Dropdown Menu */}
+{dropdownOpen && (
+  <div 
+    className="absolute right-0 mt-2 w-56 z-50 bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 transition-all duration-300 transform origin-top-right animate-fade-in"
+    style={{
+      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+    }}
+  >
+    {user ? (
+      <ul className="py-1">
+        <li
+          className="px-4 py-3 hover:bg-indigo-50 dark:hover:bg-gray-700 flex items-center gap-3 cursor-pointer transition-all duration-200 group"
+          onClick={handleUserClick}
+        >
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-gray-600 dark:to-gray-700 text-indigo-600 dark:text-indigo-300">
+            <FiUser className="text-lg" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.name || "Guest"}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email || ""}</p>
+          </div>
+          <FiChevronRight className="text-gray-400 group-hover:text-indigo-500 transition-colors" />
+        </li>
+        
+        <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+        
+        <li className="px-4 py-2.5 hover:bg-indigo-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-all duration-200 group">
+          <div className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 dark:bg-gray-700 text-indigo-600 dark:text-indigo-300">
+            <FiSettings className="text-sm" />
+          </div>
+          <span className="text-sm text-gray-700 dark:text-gray-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            Settings
+          </span>
+        </li>
+        
+        <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+        
+        <li
+          onClick={handleLogout}
+          className="px-4 py-2.5 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 cursor-pointer transition-all duration-200 group"
+        >
+          <div className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+            <FiLogOut className="text-sm" />
+          </div>
+          <span className="text-sm text-red-600 dark:text-red-400 group-hover:text-red-700 dark:group-hover:text-red-300 transition-colors">
+            Logout
+          </span>
+        </li>
+      </ul>
+    ) : (
+      <ul className="py-1">
+        <Link to="/login">
+          <li className="px-4 py-3 hover:bg-indigo-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-all duration-200 group">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-green-100 to-teal-100 dark:from-gray-600 dark:to-gray-700 text-green-600 dark:text-teal-300">
+              <MdLogin className="text-lg" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">Login</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Access your account</p>
+            </div>
+          </li>
+        </Link>
+        
+        <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+        
+        <Link to="/register">
+          <li className="px-4 py-3 hover:bg-indigo-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-all duration-200 group">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-gray-600 dark:to-gray-700 text-blue-600 dark:text-indigo-300">
+              <MdAppRegistration className="text-lg" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">Register</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Create new account</p>
+            </div>
+          </li>
+        </Link>
+        
+        <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+        
+        <Link to="/admin">
+          <li className="px-4 py-3 hover:bg-indigo-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-all duration-200 group">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-gray-600 dark:to-gray-700 text-purple-600 dark:text-pink-300">
+              <FaUserShield className="text-lg" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">Admin Panel</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Manage system</p>
+            </div>
+          </li>
+        </Link>
+      </ul>
+    )}
+  </div>
+)}
                             </div>
 
                             {/* <button>
