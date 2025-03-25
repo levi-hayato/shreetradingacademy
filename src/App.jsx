@@ -30,6 +30,9 @@ import MessagesPage from "./admin/pages/Messages";
 import StudentsTable from "./admin/components/StudentsTable";
 import AdminsTable from "./admin/components/AdminsTable";
 import SettingsPage from "./admin/pages/SettingPage";
+import ProfilePage from "./student/pages/ProfilePage";
+import Layout from "./student/components/Layout";
+import ProfileUpdatePage from "./student/pages/UpdatePage";
 
 function App() {
   return (
@@ -46,9 +49,13 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/register" element={<StudentRegistration />} />
-          <Route path="/student" element={<StudentDashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/update" element={<ProfileUpdatePage />} />
+          <Route element={<Layout />}>
+          <Route path="/student" element={<StudentDashboard />} />
+          <Route path="/student/profile" element={<ProfilePage />} />
+        </Route>
 
           {/* 🔹 Restrict /dash to Admins Only */}
           <Route
