@@ -94,22 +94,12 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Profile</h1>
-        <button
-          onClick={handleEdit}
-          className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-          aria-label="Edit profile"
-        >
-          <FaEdit className="mr-2" />
-          Edit Profile
-        </button>
-      </div>
+    <div className="w-full max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-4">
+     
 
       <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
         {/* Profile Header */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white">
+        <div className="flex justify-between items-center bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white">
           <div className="flex flex-col sm:flex-row items-center">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white bg-gray-200 flex items-center justify-center overflow-hidden">
               {profileData?.photo && !imageError ? (
@@ -128,6 +118,14 @@ const ProfilePage = () => {
               <p className="text-indigo-100 mt-1">ID: {profileData.studentId || 'STD-0000'}</p>
             </div>
           </div>
+          <button
+          onClick={handleEdit}
+          className="flex items-center px-2 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          aria-label="Edit profile"
+        >
+          <FaEdit className="mr-2 size-5" />
+        
+        </button>
         </div>
 
         {/* Profile Details */}
@@ -165,7 +163,7 @@ const ProfilePage = () => {
           <div className="bg-gray-50 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <FaRupeeSign className="text-indigo-600 mr-2" />
-              Payment Information
+              Fees Information
             </h3>
             <div className="space-y-3">
               <div className="flex justify-between">
@@ -174,14 +172,7 @@ const ProfilePage = () => {
                   {profileData.price ? `₹${profileData.price}` : 'Not specified'}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Payment Status:</span>
-                <span className={`font-medium ${
-                  profileData.paymentStatus === 'Completed' ? 'text-green-600' : 'text-yellow-600'
-                }`}>
-                  {profileData.paymentStatus || 'Pending'}
-                </span>
-              </div>
+              
               <div className="flex justify-between">
                 <span className="text-gray-600">Last Updated:</span>
                 <span className="font-medium">

@@ -33,6 +33,9 @@ import SettingsPage from "./admin/pages/SettingPage";
 import ProfilePage from "./student/pages/ProfilePage";
 import Layout from "./student/components/Layout";
 import ProfileUpdatePage from "./student/pages/UpdatePage";
+import StudentPaymentPage from "./student/pages/StdPayment";
+import StudentCoursesPage from "./student/pages/StudentCoursesPage";
+import Certificates from "./student/pages/Certificates";
 
 function App() {
   return (
@@ -55,6 +58,9 @@ function App() {
           <Route element={<Layout />}>
           <Route path="/student" element={<StudentDashboard />} />
           <Route path="/student/profile" element={<ProfilePage />} />
+          <Route path="/student/payments" element={<StudentPaymentPage />} />
+          <Route path="/student/courses" element={<StudentCoursesPage />} />
+          <Route path="/student/certificates" element={<Certificates />} />
         </Route>
 
           {/* 🔹 Restrict /dash to Admins Only */}

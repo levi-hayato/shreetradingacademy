@@ -1,224 +1,274 @@
 import { useState, useEffect } from 'react';
-import { useUser } from '../../context/UserContext';
-import { FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaGraduationCap, FaSave, FaTimes } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaGraduationCap, FaRupeeSign, FaSave } from 'react-icons/fa';
+import { db, auth } from '../../firebase/firebase';
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import uploadToCloudinary from '../../utils/uploadToCloudinary';// Your Cloudinary upload utility
 
 const ProfileUpdatePage = () => {
-  const { user, updateUser } = useUser();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [profileData, setProfileData] = useState({
     name: '',
     email: '',
-    phone: '',
-    dob: '',
+    mobile: '',
     gender: '',
-    address: '',
+    studentId: '',
     course: '',
-    batch: '',
-    photo: null
+    duration: '',
+    dateJoined: null,
+    price: '',
+    paymentStatus: '',
+    photo: ''
   });
+  const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState('');
 
   useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || '',
-        email: user.email || '',
-        phone: user.phone || '',
-        dob: user.dob || '',
-        gender: user.gender || '',
-        address: user.address || '',
-        course: user.course || '',
-        batch: user.batch || '',
-        photo: null
-      });
-      if (user.photo) {
-        setPreviewImage(user.photo);
-      }
-    }
-  }, [user]);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user && user.email) {
+        try {
+          // Fetch existing profile data
+          const studentsRef = collection(db, 'students');
+          const q = query(studentsRef, where('email', '==', user.email));
+          const querySnapshot = await getDocs(q);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+          if (!querySnapshot.empty) {
+            querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              setProfileData({
+                name: data.name || '',
+                email: data.email || user.email,
+                mobile: data.mobile || '',
+                gender: data.gender || '',
+                studentId: data.studentId || '',
+                course: data.course || '',
+                duration: data.duration || '',
+                dateJoined: data.dateJoined || null,
+                price: data.price || '',
+                paymentStatus: data.paymentStatus || 'Pending',
+                photo: data.photo || ''
+              });
+              if (data.photo) setPreviewImage(data.photo);
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({ ...prev, photo: file }));
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setSelectedFile(file);
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    updateUser(formData);
-    navigate('/profile');
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      let photoUrl = profileData.photo;
+      
+      // Upload new image if selected
+      if (selectedFile) {
+        photoUrl = await uploadToCloudinary(selectedFile);
+      }
+
+      // Update Firestore
+      const studentsRef = collection(db, 'students');
+      const q = query(studentsRef, where('email', '==', profileData.email));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        querySnapshot.forEach(async (doc) => {
+          const updatedData = {
+            ...profileData,
+            photo: photoUrl,
+            updatedAt: new Date()
+          };
+
+          await updateDoc(doc.ref, updatedData);
+
+          // Store in localStorage
+          localStorage.setItem('studentProfile', JSON.stringify(updatedData));
+
+          // Show success and redirect
+          alert('Profile updated successfully!');
+          navigate('/profile');
+        });
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-150px)]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
-          <button
-            onClick={() => navigate('/profile')}
-            className="flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            <FaTimes className="mr-2" />
-            Cancel
-          </button>
+    <div className="w-full max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">Update Profile</h1>
+      
+      <form onSubmit={handleSubmit} className="bg-white shadow-xl rounded-2xl overflow-hidden p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Profile Image Upload */}
+          <div className="col-span-1 md:col-span-2">
+            <div className="flex flex-col items-center mb-6">
+              <div className="w-32 h-32 rounded-full border-4 border-indigo-100 bg-gray-200 flex items-center justify-center overflow-hidden mb-4">
+                {previewImage ? (
+                  <img 
+                    src={previewImage} 
+                    alt="Profile preview" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <FaUser className="text-gray-500 text-5xl" />
+                )}
+              </div>
+              <label className="cursor-pointer">
+                <span className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                  Change Photo
+                </span>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* Personal Information */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+              <FaUser className="text-indigo-600 mr-2" />
+              Personal Information
+            </h2>
+            
+            <div>
+              <label className="block text-gray-700 mb-1">Full Name</label>
+              <input
+                type="text"
+                name="name"
+                value={profileData.name}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 mb-1">Mobile Number</label>
+              <input
+                type="tel"
+                name="mobile"
+                value={profileData.mobile}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 mb-1">Gender</label>
+              <select
+                name="gender"
+                value={profileData.gender}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+                   
+
+          {/* Contact Information */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+              <FaEnvelope className="text-indigo-600 mr-2" />
+              Contact Information
+            </h2>
+
+            <div>
+              <label className="block text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={profileData.email}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                disabled
+              />
+            </div>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white shadow-xl rounded-2xl overflow-hidden">
-          {/* Profile Header */}
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white">
-            <div className="flex flex-col md:flex-row items-center">
-              <div className="relative">
-                <div className="w-24 h-24 rounded-full border-4 border-white bg-gray-200 flex items-center justify-center overflow-hidden">
-                  {previewImage ? (
-                    <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    <FaUser className="text-gray-500 text-4xl" />
-                  )}
-                </div>
-                <label className="absolute bottom-0 right-0 bg-white text-indigo-600 rounded-full p-2 shadow-md cursor-pointer hover:bg-gray-100">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-                  </svg>
-                </label>
-              </div>
-              <div className="mt-4 md:mt-0 md:ml-6 w-full">
-                <div className="mb-4">
-                  <label htmlFor="name" className="block text-indigo-100 text-sm font-medium mb-1">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-lg bg-indigo-400 bg-opacity-20 text-white placeholder-indigo-200 border border-indigo-300 focus:ring-2 focus:ring-white focus:border-white"
-                    placeholder="Enter your full name"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Profile Form */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-            <FormSection
-              icon={<FaUser className="text-indigo-600" />}
-              title="Personal Information"
-              fields={[
-                { id: 'dob', label: 'Date of Birth', type: 'date', value: formData.dob, onChange: handleChange },
-                { 
-                  id: 'gender', 
-                  label: 'Gender', 
-                  type: 'select', 
-                  value: formData.gender, 
-                  onChange: handleChange,
-                  options: ['Male', 'Female', 'Other', 'Prefer not to say']
-                },
-              ]}
-            />
-
-            <FormSection
-              icon={<FaEnvelope className="text-indigo-600" />}
-              title="Contact Information"
-              fields={[
-                { id: 'email', label: 'Email', type: 'email', value: formData.email, onChange: handleChange },
-                { id: 'phone', label: 'Phone', type: 'tel', value: formData.phone, onChange: handleChange },
-                { id: 'address', label: 'Address', type: 'textarea', value: formData.address, onChange: handleChange },
-              ]}
-            />
-
-            <FormSection
-              icon={<FaGraduationCap className="text-indigo-600" />}
-              title="Academic Information"
-              fields={[
-                { id: 'course', label: 'Course', type: 'text', value: formData.course, onChange: handleChange },
-                { id: 'batch', label: 'Batch', type: 'text', value: formData.batch, onChange: handleChange },
-              ]}
-            />
-
-            <div className="flex items-end">
-              <button
-                type="submit"
-                className="w-full flex items-center justify-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-              >
+        <div className="mt-8 flex justify-end">
+          <button
+            type="button"
+            onClick={() => navigate('/profile')}
+            className="px-6 py-2 mr-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="flex items-center px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+          >
+            {saving ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Saving...
+              </>
+            ) : (
+              <>
                 <FaSave className="mr-2" />
                 Save Changes
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
+              </>
+            )}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
-
-const FormSection = ({ icon, title, fields }) => (
-  <div className="bg-gray-50 rounded-xl p-6">
-    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-      {icon}
-      <span className="ml-2">{title}</span>
-    </h3>
-    <div className="space-y-4">
-      {fields.map((field, index) => (
-        <div key={index}>
-          <label htmlFor={field.id} className="block text-sm font-medium text-gray-700 mb-1">
-            {field.label}
-          </label>
-          {field.type === 'select' ? (
-            <select
-              id={field.id}
-              name={field.id}
-              value={field.value}
-              onChange={field.onChange}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="">Select {field.label}</option>
-              {field.options.map(option => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          ) : field.type === 'textarea' ? (
-            <textarea
-              id={field.id}
-              name={field.id}
-              value={field.value}
-              onChange={field.onChange}
-              rows="3"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          ) : (
-            <input
-              type={field.type}
-              id={field.id}
-              name={field.id}
-              value={field.value}
-              onChange={field.onChange}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          )}
-        </div>
-      ))}
-    </div>
-  </div>
-);
 
 export default ProfileUpdatePage;

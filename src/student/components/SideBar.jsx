@@ -22,9 +22,6 @@ import {
       { name: 'Dashboard', icon: FaHome, path: '/student' },
       { name: 'My Courses', icon: FaBook, path: '/student/courses' },
       { name: 'Payments', icon: FaMoneyBill, path: '/student/payments' },
-      { name: 'Progress', icon: FaChartLine, path: '/student/progress' },
-      { name: 'Schedule', icon: FaCalendarAlt, path: '/student/schedule' },
-      { name: 'Assignments', icon: FaFileAlt, path: '/student/assignments' },
       { name: 'Certificates', icon: FaAward, path: '/student/certificates' },
       { name: 'Profile', icon: FaUser, path: '/student/profile' },
     ];
@@ -99,9 +96,14 @@ import {
             })}
           </ul>
         </nav>
+
+        <div className="flex justify-center p-4">
+          <button onClick={() => navigate('/')} className="flex items-center text-sm bg-indigo-600 hover:bg-indigo-700 px-1 py-2 rounded text-white-900 hover:text-white">Go Back</button>
+        </div>
   
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-indigo-700">
+      
           <div className={`flex items-center ${isSidebarOpen ? 'justify-start' : 'justify-center'}`}>
             <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
               {user?.name?.charAt(0) || 'S'}
@@ -121,6 +123,7 @@ import {
               </div>
             )}
           </div>
+         
         </div>
       </aside>
     );

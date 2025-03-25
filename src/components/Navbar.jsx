@@ -50,7 +50,7 @@ const Navbar = () => {
     };
 
     // Define routes where Navbar should be hidden
-    const hideNavbarRoutes = ["/student", "/dash", "/dash/sales", "/dash/manage", "/dash/payments" , "/dash/message" , "/dash/students" , "/dash/admins" , "/dash/settings"];
+    const hideNavbarRoutes = ["/student", "/student/profile", "/student/courses", "/student/payments", "/student/certificates", "/dash", "/dash/sales", "/dash/manage", "/dash/payments" , "/dash/message" , "/dash/students" , "/dash/admins" , "/dash/settings"];
     const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
 
     return (
