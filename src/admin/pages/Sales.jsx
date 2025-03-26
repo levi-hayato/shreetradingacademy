@@ -110,7 +110,7 @@ const Sales = () => {
             <p className="text-gray-600">Track and analyze Sales and transactions</p>
           </div>
           
-          <div className="flex items-center gap-3 mt-4 md:mt-0">
+          <div className="flex flex-col md:flex-row items-center gap-3 mt-4 md:mt-0">
             <div className="relative">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
