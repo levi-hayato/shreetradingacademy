@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { db } from "../../firebase/firebase";
 import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } from "firebase/firestore";
 import uploadToCloudinary from "../../utils/uploadToCloudinary";
-import { useAlert } from "../../context/AlertContext";
 import { FaBook, FaClock, FaDollarSign, FaCloudUploadAlt, FaPlus, FaSpinner, FaTrash, FaTag, FaCheckCircle } from "react-icons/fa";
 import { FaImage, FaPen } from "react-icons/fa6";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAlertContext } from "../../context/AlertContext";
 
 export default function AddCourse() {
-  const { showAlert } = useAlert();
+  const { showAlert } = useAlertContext();
   const [courseName, setCourseName] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [courseDuration, setCourseDuration] = useState("1 Month");

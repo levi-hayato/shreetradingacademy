@@ -5,21 +5,24 @@ import { db, auth } from "../../firebase/firebase";
 import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
 import uploadToCloudinary from "../../utils/uploadToCloudinary";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { useAlert } from "../../context/AlertContext";
+
 import Cropper from "react-easy-crop";
 import { getCroppedImg } from "../../utils/cropImage";
 import { IoClose, IoMail, IoLockClosed, IoPerson, IoImage, IoKey, IoCalendar, IoCall } from "react-icons/io5";
-import { FaBookOpen, FaRupeeSign } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { FaArrowLeft, FaBookOpen, FaRupeeSign } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAlertContext } from "../../context/AlertContext";
+import { TailSpin } from "react-loader-spinner";
 
 const StudentRegistration = () => {
     const { setUser } = useContext(UserContext);
-    const { showAlert } = useAlert();
     const navigate = useNavigate();
+    const { showAlert } = useAlertContext();
 
     const [student, setStudent] = useState({
         name: "",
         email: "",
+        mobile: "",
         password: "",
         confirmPassword: "",
         course: "",
@@ -30,7 +33,6 @@ const StudentRegistration = () => {
     const [courses, setCourses] = useState([]);
     const [imageFile, setImageFile] = useState(null);
     const [loading, setLoading] = useState(false);
-
     const [croppedImage, setCroppedImage] = useState(null);
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
@@ -183,177 +185,279 @@ const StudentRegistration = () => {
     };
 
     return (
-        <div className="flex flex-col md:flex-row justify-center items-center min-h-screen bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
-            {/* Left Section - Registration Form */}
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
             <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="w-full md:w-1/1 justify-around bg-white flex rounded-lg shadow-lg p-8 mx-4"
+                className="w-full max-w-6xl bg-white rounded-xl shadow-2xl overflow-hidden"
             >
-              <div>
-                  {/* Cropper Modal */}
-                  {showCropper && (
-                    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-lg">
-                            <h2 className="text-lg font-semibold mb-4">Crop Your Image</h2>
-                            <div className="relative w-64 h-64">
-                                <Cropper
-                                    image={imageFile}
-                                    crop={crop}
-                                    zoom={zoom}
-                                    aspect={1}
-                                    onCropChange={setCrop}
-                                    onZoomChange={setZoom}
-                                    onCropComplete={handleCropComplete}
+                <div className="flex flex-col lg:flex-row">
+                    {/* Left Section - Registration Form */}
+                    <div className="w-full lg:w-1/2 p-8 md:p-10">
+                        <div className="text-center mb-8">
+                            <h1 className="text-3xl font-bold text-gray-800">Student Registration</h1>
+                            <p className="text-gray-500 mt-2">Join our learning community today</p>
+                        </div>
+
+                        {/* Profile Image Upload */}
+                        <div className="flex justify-center mb-6">
+                            <label className="cursor-pointer group">
+                                <div className="relative">
+                                    {croppedImage ? (
+                                        <img 
+                                            src={croppedImage} 
+                                            alt="Profile" 
+                                            className="w-32 h-32 object-cover rounded-full border-4 border-white shadow-md group-hover:border-blue-200 transition-all duration-300"
+                                        />
+                                    ) : (
+                                        <div className="w-32 h-32 flex items-center justify-center rounded-full bg-gray-100 border-4 border-dashed border-gray-300 group-hover:border-blue-300 transition-all duration-300">
+                                            <div className="text-center">
+                                                <IoImage className="text-blue-500 text-4xl mx-auto" />
+                                                <span className="text-sm text-gray-500 mt-2">Upload Photo</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-2 shadow-md group-hover:bg-blue-600 transition-all">
+                                        <IoImage className="text-lg" />
+                                    </div>
+                                </div>
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="hidden" 
+                                    onChange={handleFileChange} 
                                 />
+                            </label>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Name */}
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <IoPerson className="text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Full Name"
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        required
+                                        value={student.name}
+                                        onChange={(e) => setStudent({ ...student, name: e.target.value })}
+                                    />
+                                </div>
+
+                                {/* Email */}
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <IoMail className="text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="email"
+                                        placeholder="Email Address"
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        required
+                                        value={student.email}
+                                        onChange={(e) => setStudent({ ...student, email: e.target.value })}
+                                    />
+                                </div>
+
+                                {/* Mobile */}
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <IoCall className="text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="tel"
+                                        placeholder="Mobile Number"
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        required
+                                        value={student.mobile}
+                                        onChange={(e) => setStudent({ ...student, mobile: e.target.value })}
+                                    />
+                                </div>
+
+                                {/* Course Selection */}
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <FaBookOpen className="text-gray-400" />
+                                    </div>
+                                    <select
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                                        onChange={handleCourseChange}
+                                        required
+                                    >
+                                        <option className="rounded-full" value="">Select Course</option>
+                                        {courses.map((course) => (
+                                            <option className=" bg-white" key={course.id} value={course.id}>
+                                                {course.name} - ₹{course.price}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                {/* Password */}
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <IoLockClosed className="text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="password"
+                                        placeholder="Password"
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        required
+                                        value={student.password}
+                                        onChange={(e) => setStudent({ ...student, password: e.target.value })}
+                                    />
+                                </div>
+
+                                {/* Confirm Password */}
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <IoKey className="text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="password"
+                                        placeholder="Confirm Password"
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        required
+                                        value={student.confirmPassword}
+                                        onChange={(e) => setStudent({ ...student, confirmPassword: e.target.value })}
+                                    />
+                                </div>
                             </div>
-                            <div className="flex justify-between gap-4 mt-4">
-                                <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => setShowCropper(false)}>Cancel</button>
-                                <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleCropSave}>Crop & Save</button>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className={`w-full flex items-center justify-center py-3 px-4 rounded-lg font-medium text-white transition-all ${
+                                    loading 
+                                        ? 'bg-blue-400 cursor-not-allowed'
+                                        : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                                }`}
+                            >
+                                {loading ? (
+                                    <TailSpin color="#ffffff" height={20} width={20} />
+                                ) : (
+                                    "Register Now"
+                                )}
+                            </button>
+                             <button onClick={() => navigate('/')} className="w-full flex items-center justify-center mt-4 text-white font-semibold py-3 px-4 rounded-lg hover:text-black border bg-blue-600 border-gray-200 hover:bg-gray-50 transition-all"
+                                                > <FaArrowLeft className="mr-2"/> Go Back</button>
+                        </form>
+                    </div>
+
+                    {/* Right Section - Visual Content */}
+                    <div className="hidden lg:block w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 relative">
+                        <div className="absolute inset-0 flex items-center justify-center p-10">
+                            <div className="text-center text-white">
+                                <h2 className="text-3xl font-bold mb-4">Welcome to Our Academy</h2>
+                                <p className="text-blue-100 mb-8 text-lg">
+                                    Start your learning journey with our expert instructors and comprehensive courses
+                                </p>
+                                <div className="relative w-64 h-64 mx-auto">
+                                    <motion.div
+                                        className="absolute w-full h-full bg-white/10 rounded-full backdrop-blur-sm"
+                                        animate={{ scale: [1, 1.1, 1], rotate: [0, 360] }}
+                                        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                                    />
+                                    <motion.div
+                                        className="absolute w-3/4 h-3/4 bg-white/5 rounded-lg backdrop-blur-sm top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                                        animate={{ rotate: [0, -360] }}
+                                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-40 h-40 bg-white/20 rounded-full backdrop-blur-sm flex items-center justify-center">
+                                            <div className="w-24 h-24 bg-white/30 rounded-full backdrop-blur-sm flex items-center justify-center">
+                                                <FaBookOpen className="text-white text-3xl" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                )}
-
-                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Student Registration</h2>
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                    {/* Profile Image Upload */}
-                    <div className="flex justify-center">
-                        <label className="cursor-pointer">
-                            {croppedImage ? (
-                                <img src={croppedImage} alt="Preview" className="w-24 h-24 object-cover rounded-full border-2 border-blue-500" />
-                            ) : (
-                                <div className="w-24 h-24 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 hover:border-blue-500 transition">
-                                    <IoImage className="text-blue-500 text-3xl" />
-                                </div>
-                            )}
-                            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-                        </label>
-                    </div>
-
-                    {/* Student Name */}
-                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition">
-                        <IoPerson className="text-gray-500 mr-2" />
-                        <input
-                            type="text"
-                            placeholder="Student Name"
-                            className="w-full outline-none"
-                            required
-                            value={student.name}
-                            onChange={(e) => setStudent({ ...student, name: e.target.value })}
-                        />
-                    </div>
-
-                    {/* Student Email */}
-                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition">
-                        <IoMail className="text-gray-500 mr-2" />
-                        <input
-                            type="email"
-                            placeholder="Student Email"
-                            className="w-full outline-none"
-                            required
-                            value={student.email}
-                            onChange={(e) => setStudent({ ...student, email: e.target.value })}
-                        />
-                    </div>
-
-                    {/* Mobile Number */}
-                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition">
-                        <IoCall className="text-gray-500 mr-2" />
-                        <input
-                            type="tel"
-                            placeholder="Mobile Number"
-                            className="w-full outline-none"
-                            required
-                            value={student.mobile}
-                            onChange={(e) => setStudent({ ...student, mobile: e.target.value })}
-                        />
-                    </div>
-
-                    {/* Course Selection */}
-                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition">
-                        <FaBookOpen className="text-gray-500 mr-2" />
-                        <select
-                            className="w-full outline-none"
-                            onChange={handleCourseChange}
-                            required
-                        >
-                            <option value="">Select a Course</option>
-                            {courses.map((course) => (
-                                <option key={course.id} value={course.id}>
-                                    {course.name} - ₹{course.price}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Password */}
-                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition">
-                        <IoLockClosed className="text-gray-500 mr-2" />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            className="w-full outline-none"
-                            required
-                            value={student.password}
-                            onChange={(e) => setStudent({ ...student, password: e.target.value })}
-                        />
-                    </div>
-
-                    {/* Confirm Password */}
-                    <div className="flex items-center border border-gray-300 p-2 rounded-lg hover:border-blue-500 transition">
-                        <IoKey className="text-gray-500 mr-2" />
-                        <input
-                            type="password"
-                            placeholder="Confirm Password"
-                            className="w-full outline-none"
-                            required
-                            value={student.confirmPassword}
-                            onChange={(e) => setStudent({ ...student, confirmPassword: e.target.value })}
-                        />
-                    </div>
-
-                    {/* Submit Button */}
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition"
-                        disabled={loading}
-                    >
-                        {loading ? "Registering..." : "Register"}
-                    </button>
-                </form>
-              </div>
-
-               {/* Right Section - Shape Animation */}
-            <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="hidden md:flex items-center justify-center"
-            >
-                <div className="relative w-96 h-96">
-                    {/* Animated Shapes */}
-                    <motion.div
-                        className="absolute w-100 h-100 bg-blue-400 rounded-full"
-                        animate={{ y: [0, -20, 0], rotate: [0, 360] }}
-                        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                    <motion.div
-                        className="absolute w-80 h-80 bg-indigo-400 rounded-lg"
-                        animate={{ x: [0, 20, 0], rotate: [0, -360] }}
-                        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                    <motion.div
-                        className="absolute w-60 h-60 bg-purple-400 rounded-full"
-                        animate={{ y: [0, 20, 0], rotate: [0, 360] }}
-                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                    />
                 </div>
             </motion.div>
-            </motion.div>
 
-           
+            {/* Image Cropper Modal */}
+            <AnimatePresence>
+                {showCropper && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden"
+                        >
+                            <div className="p-6">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-xl font-semibold text-gray-800">Crop Profile Image</h3>
+                                    <button 
+                                        onClick={() => setShowCropper(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <IoClose size={24} />
+                                    </button>
+                                </div>
+                                <div className="relative w-full h-64">
+                                    <Cropper
+                                        image={imageFile}
+                                        crop={crop}
+                                        zoom={zoom}
+                                        aspect={1}
+                                        onCropChange={setCrop}
+                                        onZoomChange={setZoom}
+                                        onCropComplete={handleCropComplete}
+                                        cropShape="round"
+                                        showGrid={false}
+                                        classes={{
+                                            containerClassName: "rounded-lg",
+                                            mediaClassName: "rounded-lg",
+                                        }}
+                                    />
+                                </div>
+                                <div className="mt-4">
+                                    <input
+                                        type="range"
+                                        min="1"
+                                        max="3"
+                                        step="0.1"
+                                        value={zoom}
+                                        onChange={(e) => setZoom(e.target.value)}
+                                        className="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer"
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-3 mt-6">
+                                    <button
+                                        onClick={() => setShowCropper(false)}
+                                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleCropSave}
+                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                                    >
+                                        Save Crop
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

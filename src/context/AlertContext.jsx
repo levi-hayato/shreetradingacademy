@@ -1,22 +1,40 @@
-import { createContext, useState, useContext } from "react";
-import Alert from "../components/customAlert";
+// AlertContext.js
+import { createContext, useContext, useState } from 'react';
+import Alert from '../components/Alert';
 
 const AlertContext = createContext();
 
-export const AlertProvider = ({ children }) => {
+export function AlertProvider({ children }) {
   const [alert, setAlert] = useState(null);
 
-  const showAlert = (type, message, duration = 3000) => {
-    setAlert({ type, message, duration });
-    setTimeout(() => setAlert(null), duration);
+  const showAlert = (type, message, duration = 5000) => {
+    setAlert({ type, message });
+    
+    if (duration) {
+      setTimeout(() => {
+        setAlert(null);
+      }, duration);
+    }
+  };
+
+  const closeAlert = () => {
+    setAlert(null);
   };
 
   return (
-    <AlertContext.Provider value={{ showAlert }}>
+    <AlertContext.Provider value={{ showAlert, closeAlert }}>
       {children}
-      {alert && <Alert type={alert.type} message={alert.message} duration={alert.duration} />}
+      {alert && (
+        <Alert
+          type={alert.type}
+          message={alert.message}
+          onClose={closeAlert}
+        />
+      )}
     </AlertContext.Provider>
   );
-};
+}
 
-export const useAlert = () => useContext(AlertContext);
+export function useAlertContext() {
+  return useContext(AlertContext);
+}
