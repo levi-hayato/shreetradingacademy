@@ -65,7 +65,7 @@ const Layout = () => {
       <main className={`
         flex-1 overflow-auto
         transition-all duration-300
-        ${isSidebarOpen && !isMobile ? 'md:ml-1' : 'md:ml-15'}
+        ${isSidebarOpen && !isMobile ? 'md:ml-0' : 'md:ml-15'}
       `}>
         {/* Mobile Header */}
         <header className="md:hidden flex items-center p-4 bg-white shadow-sm sticky top-0 z-10">
@@ -79,7 +79,7 @@ const Layout = () => {
         </header>
 
         {/* Centered Content Container */}
-        <div className="min-h-[calc(100vh-100px)] w-full flex justify-center px-6  py-6">
+        <div className="min-h-[calc(100vh-100px)] w-full flex justify-center px-1  py-0">
           <div className="w-full"> {/* Adjust max-width as needed */}
             <Outlet />
           </div>

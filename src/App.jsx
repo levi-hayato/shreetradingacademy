@@ -12,7 +12,7 @@ import Dashboard from "./admin/Dashboard";
 import Login from "./pages/Login";
 import Sidebar, { SidebarItem } from "./admin/components/Sidebar";
 import FooterContainer from "./components/FooterContainer";
-import { FaChild, FaCog, FaHome } from "react-icons/fa";
+import { FaChild, FaCog, FaHome, FaMoneyBill } from "react-icons/fa";
 import { FaChartBar, FaMoneyBill1, FaPersonCircleCheck, FaUsers } from "react-icons/fa6";
 import Sales from "./admin/pages/Sales";
 import StudentRegistration from "./student/pages/StudentRegistration";
@@ -36,74 +36,83 @@ import ProfileUpdatePage from "./student/pages/UpdatePage";
 import StudentPaymentPage from "./student/pages/StdPayment";
 import StudentCoursesPage from "./student/pages/StudentCoursesPage";
 import Certificates from "./student/pages/Certificates";
+import CookiesPolicy from "./components/Cookies Policy";
+import OfflinePurchases from "./admin/pages/OfflinePurchases";
 
 function App() {
   return (
     <BrowserRouter>
-    <AlertProvider>
-      <UserProvider>
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/course/:id" element={<CourseDetails />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/register" element={<StudentRegistration />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/update" element={<ProfileUpdatePage />} />
-          <Route element={<Layout />}>
-          <Route path="/student" element={<StudentDashboard />} />
-          <Route path="/student/profile" element={<ProfilePage />} />
-          <Route path="/student/payments" element={<StudentPaymentPage />} />
-          <Route path="/student/courses" element={<StudentCoursesPage />} />
-          <Route path="/student/certificates" element={<Certificates />} />
-        </Route>
+      <AlertProvider>
+        <UserProvider>
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/course/:id" element={<CourseDetails />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/register" element={<StudentRegistration />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/update" element={<ProfileUpdatePage />} />
+            <Route path="/cookiespolicy" element={<CookiesPolicy />} />
+            <Route element={<Layout />}>
+              <Route path="/student" element={<StudentDashboard />} />
+              <Route path="/student/profile" element={<ProfilePage />} />
+              <Route path="/student/payments" element={<StudentPaymentPage />} />
+              <Route path="/student/courses" element={<StudentCoursesPage />} />
+              <Route path="/student/certificates" element={<Certificates />} />
+            </Route>
 
-          {/* 🔹 Restrict /dash to Admins Only */}
-          <Route
-            path="/dash/*"
-            element={
-              <AdminRoute>
-                <div className="flex h-screen bg-gray-100">
-                  <Sidebar>
-                    <SidebarItem icon={<FaHome />} text="Home" to={'/dash'} />
-                    <SidebarItem icon={<FaChartBar />} text="Sales" to={'/dash/sales'} />
-                    <SidebarItem icon={<FaUsers />} text="Manage" dropdownItems={[
-                      { text: "Courses", to: "/dash/manage", icon: <FaUsers /> },
-                      { text: "Admins", to: "/dash/admins", icon: <FaPersonCircleCheck /> },
-                      { text: "Students", to: "/dash/students", icon: <FaChild /> },
-                    ]} />
-                    <SidebarItem icon={<FaMoneyBill1 />} text="Payments" to={'/dash/payments'} alert />
-                    <SidebarItem icon={<BsMessenger />} text="Messages" to={'/dash/message'} alert />
-                    <SidebarItem icon={<FaCog />} text="Settings" to={'/dash                                                                                                                                                                            /settings'} alert />
-                  </Sidebar>
-                  <div className="flex-1 p-6 overflow-y-auto">
-                    <Routes>
-                      <Route path="/" element={<Dashboard />} />
-                      <Route path="/sales" element={<Sales />} />
-                      <Route path="/users" element={<Users />} />
-                      <Route path="/payments" element={<Payments />} />
-                      <Route path="/manage" element={<AddCourse />} />
-                      <Route path="/message" element={<MessagesPage/>} />
-                      <Route path="/students" element={<StudentsTable/>} />
-                      <Route path="/admins" element={<AdminsTable/>} />
-                      <Route path="/settings" element={<SettingsPage/>} />
-                    </Routes>
+            {/* Admin Dashboard Routes */}
+            <Route
+              path="/dash/*"
+              element={
+                <AdminRoute>
+                  <div className="flex h-screen bg-gray-100">
+                    <Sidebar>
+                      <SidebarItem icon={<FaHome />} text="Home" to={'/dash'} />
+                      <SidebarItem icon={<FaChartBar />} text="Sales" to={'/dash/sales'} />
+                      <SidebarItem 
+                        icon={<FaUsers />} 
+                        text="Manage" 
+                        dropdownItems={[
+                          { text: "Courses", to: "/dash/manage", icon: <FaUsers /> },
+                          { text: "Admins", to: "/dash/admins", icon: <FaPersonCircleCheck /> },
+                          { text: "Students", to: "/dash/students", icon: <FaChild /> },
+                        ]} 
+                      />
+                      <SidebarItem icon={<FaMoneyBill1 />} text="Payments" to={'/dash/payments'} alert />
+                      <SidebarItem icon={<FaMoneyBill />} text="Offline" to={'/dash/offline'} alert />
+                      <SidebarItem icon={<BsMessenger />} text="Messages" to={'/dash/message'} alert />
+                      <SidebarItem icon={<FaCog />} text="Settings" to={'/dash/settings'} />
+                    </Sidebar>
+                    <div className="flex-1 p-0 overflow-y-auto">
+                      <Routes>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/sales" element={<Sales />} />
+                        <Route path="/users" element={<Users />} />
+                        <Route path="/payments" element={<Payments />} />
+                        <Route path="/manage" element={<AddCourse />} />
+                        <Route path="/message" element={<MessagesPage/>} />
+                        <Route path="/students" element={<StudentsTable/>} />
+                        <Route path="/admins" element={<AdminsTable/>} />
+                        <Route path="/settings" element={<SettingsPage/>} />
+                        <Route path="/offline" element={<OfflinePurchases/>} />
+                      </Routes>
+                    </div>
                   </div>
-                </div>
-              </AdminRoute>
-            }
-          />
+                </AdminRoute>
+              }
+            />
 
-          <Route path="*" element={<Error />} />
-        </Routes>
-        <GoToTop />
-        <FooterContainer />
-      </UserProvider>
+            <Route path="*" element={<Error />} />
+          </Routes>
+          <GoToTop />
+          <FooterContainer />
+        </UserProvider>
       </AlertProvider>
     </BrowserRouter>
   );

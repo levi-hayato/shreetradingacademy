@@ -24,7 +24,7 @@ const Footer = () => {
         </div>
         <button 
           onClick={() => downloadCV(Resume)} 
-          className="bg-blue-600 text-white font-bold px-6 py-3 rounded-md hover:bg-blue-500 transition duration-100"
+          className="bg-btn text-white font-bold px-6 py-3 rounded-md hover:bg-blue-500 transition duration-100"
         >
           Download Broucher
         </button>

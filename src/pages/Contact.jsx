@@ -1,196 +1,293 @@
-import { useState, useContext } from "react";
-import { db } from "../firebase/firebase";
-import { collection, addDoc } from "firebase/firestore";
-import { UserContext } from "../context/UserContext";
-import { IoMail, IoPerson, IoCall, IoChatbubble } from "react-icons/io5";
-import { FaInstagram, FaLinkedin, FaWhatsapp, FaEnvelope } from "react-icons/fa";
-import { Send, Loader2 } from "lucide-react";
-import Lottie from "lottie-react";
-import contactAnimation from "../assets/contact.json"; // Ensure this file exists
+import { useState } from 'react';
+import { db } from '../firebase/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { FaPaperPlane, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const Contact = () => {
-  const { user } = useContext(UserContext);
+const ContactPage = () => {
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    contact: "",
-    message: "",
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: ''
   });
-
-  const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState(null);
-
-  const showAlert = (type, message) => {
-    setAlert({ type, message });
-    setTimeout(() => setAlert(null), 3000);
-  };
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user) {
-      showAlert("error", "Please log in to send a message.");
-      return;
-    }
+    setIsSubmitting(true);
 
-    setLoading(true);
     try {
-      await addDoc(collection(db, "contacts"), {
+      // Add document to Firestore
+      await addDoc(collection(db, 'contacts'), {
         ...formData,
-        uid: user.uid,
-        timestamp: new Date(),
+        createdAt: serverTimestamp(),
+        status: 'new',
+        resolved: false
       });
 
-      showAlert("success", "Message sent successfully!");
-      setFormData({ ...formData, contact: "", message: "" });
-    } catch (error) {
-      showAlert("error", "Failed to send message.");
-    }
+      // Show success message
+      toast.success('Your message has been sent successfully!', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
 
-    setLoading(false);
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
+
+    } catch (error) {
+      console.error('Error submitting form: ', error);
+      toast.error('Failed to send message. Please try again.', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-r from-blue-50 to-purple-50 p-6">
-      <div className="w-full max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-        {/* Left - Contact Form */}
-        <div className="w-full md:w-1/2 p-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Contact Us</h2>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
+      <ToastContainer />
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Get In Touch</h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Have questions about our courses? Reach out to us and we'll get back to you as soon as possible.
+          </p>
+        </motion.div>
 
-          {alert && (
-            <div
-              className={`text-white px-4 py-2 rounded mb-4 ${
-                alert.type === "success" ? "bg-green-500" : "bg-red-500"
-              }`}
-            >
-              {alert.message}
+        <div className="grid lg:grid-cols-2 gap-12">
+          {/* Contact Form */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-white rounded-2xl shadow-xl overflow-hidden"
+          >
+            <div className="p-8 sm:p-10">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a message</h2>
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      Full Name *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                        placeholder="Your name"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    placeholder="+91 1234567890"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                    Subject *
+                  </label>
+                  <input
+                    type="text"
+                    id="subject"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    placeholder="What's this about?"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                    Your Message *
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    rows="5"
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    placeholder="Write your message here..."
+                  ></textarea>
+                </div>
+
+                <div>
+                  <motion.button
+                    type="submit"
+                    disabled={isSubmitting}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full flex items-center justify-center px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors duration-300 shadow-md"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <FaPaperPlane className="mr-2" />
+                        Send Message
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+              </form>
             </div>
-          )}
+          </motion.div>
 
-          <form className="space-y-6">
-            <div className="relative">
-              <input
-                type="text"
-                name="name"
-                placeholder=" "
-                className="w-full px-4 py-2 border-b-2 border-gray-300 focus:border-blue-500 outline-none bg-transparent peer"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                disabled={!!user?.name}
-              />
-              <label className="absolute left-0 -top-4 text-sm text-gray-500 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-4 peer-focus:text-sm peer-focus:text-blue-500">
-                Your Name
-              </label>
-              <IoPerson className="absolute right-2 top-2 text-gray-400" />
+          {/* Contact Info */}
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="space-y-8"
+          >
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="p-8 sm:p-10">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
+                
+                <div className="space-y-6">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 bg-indigo-100 p-3 rounded-lg mr-4">
+                      <FaPhone className="text-indigo-600 text-xl" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Phone</h3>
+                      <p className="text-gray-600 mt-1">+91 1234567890</p>
+                      <p className="text-gray-600">Mon-Fri, 9am-6pm</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 bg-indigo-100 p-3 rounded-lg mr-4">
+                      <FaEnvelope className="text-indigo-600 text-xl" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Email</h3>
+                      <p className="text-gray-600 mt-1">contact@shreetradingacademy.com</p>
+                      <p className="text-gray-600">Support: support@shreetradingacademy.com</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 bg-indigo-100 p-3 rounded-lg mr-4">
+                      <FaMapMarkerAlt className="text-indigo-600 text-xl" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Address</h3>
+                      <p className="text-gray-600 mt-1">123 Trading Street, Financial District</p>
+                      <p className="text-gray-600">Mumbai, Maharashtra 400001</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="relative">
-              <input
-                type="email"
-                name="email"
-                placeholder=" "
-                className="w-full px-4 py-2 border-b-2 border-gray-300 focus:border-blue-500 outline-none bg-transparent peer"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                disabled={!!user?.email}
-              />
-              <label className="absolute left-0 -top-4 text-sm text-gray-500 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-4 peer-focus:text-sm peer-focus:text-blue-500">
-                Your Email
-              </label>
-              <IoMail className="absolute right-2 top-2 text-gray-400" />
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="p-8 sm:p-10">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+                
+                <div className="space-y-4">
+                  <div className="border-b border-gray-200 pb-4">
+                    <h3 className="text-lg font-medium text-gray-900">How soon will I get a response?</h3>
+                    <p className="text-gray-600 mt-1">We typically respond within 24-48 hours during business days.</p>
+                  </div>
+
+                  <div className="border-b border-gray-200 pb-4">
+                    <h3 className="text-lg font-medium text-gray-900">What's the best way to reach support?</h3>
+                    <p className="text-gray-600 mt-1">For urgent matters, please call our support line. For non-urgent queries, email is preferred.</p>
+                  </div>
+
+                  <div className="border-b border-gray-200 pb-4">
+                    <h3 className="text-lg font-medium text-gray-900">Can I visit your office?</h3>
+                    <p className="text-gray-600 mt-1">Yes, by appointment only. Please contact us to schedule a visit.</p>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div className="relative">
-              <input
-                type="tel"
-                name="contact"
-                placeholder=" "
-                className="w-full px-4 py-2 border-b-2 border-gray-300 focus:border-blue-500 outline-none bg-transparent peer"
-                required
-                value={formData.contact}
-                onChange={handleChange}
-              />
-              <label className="absolute left-0 -top-4 text-sm text-gray-500 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-4 peer-focus:text-sm peer-focus:text-blue-500">
-                Your Contact
-              </label>
-              <IoCall className="absolute right-2 top-2 text-gray-400" />
-            </div>
-
-            <div className="relative">
-              <textarea
-                name="message"
-                placeholder=" "
-                className="w-full px-4 py-2 border-b-2 border-gray-300 focus:border-blue-500 outline-none bg-transparent peer resize-none"
-                required
-                value={formData.message}
-                onChange={handleChange}
-              />
-              <label className="absolute left-0 -top-4 text-sm text-gray-500 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-4 peer-focus:text-sm peer-focus:text-blue-500">
-                Your Message
-              </label>
-              <IoChatbubble className="absolute right-2 top-2 text-gray-400" />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white p-3 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-600 transition-all transform hover:scale-105"
-              disabled={loading}
-              onClick={handleSubmit}
-            >
-              {loading ? <Loader2 className="animate-spin" /> : <Send />}{" "}
-              {loading ? "Sending..." : "Send Message"}
-            </button>
-          </form>
-        </div>
-
-        {/* Right - Lottie Animation & Social Links */}
-        <div className="w-full md:w-1/2 bg-gradient-to-r from-blue-500 to-purple-500 p-8 flex flex-col items-center justify-center">
-          <div className="animate-float">
-            <Lottie animationData={contactAnimation} className="w-72 h-72" loop={true} />
-          </div>
-
-          {/* Social Links */}
-          <div className="flex gap-6 mt-8">
-            <a
-              href="https://www.instagram.com/yourprofile"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-pink-300 transition-all transform hover:scale-110"
-            >
-              <FaInstagram size={28} />
-            </a>
-            <a
-              href="https://www.linkedin.com/in/yourprofile"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-blue-200 transition-all transform hover:scale-110"
-            >
-              <FaLinkedin size={28} />
-            </a>
-            <a
-              href="mailto:your-email@example.com"
-              className="text-white hover:text-red-200 transition-all transform hover:scale-110"
-            >
-              <FaEnvelope size={28} />
-            </a>
-            <a
-              href="https://wa.me/919876543210"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-green-300 transition-all transform hover:scale-110"
-            >
-              <FaWhatsapp size={28} />
-            </a>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
   );
 };
 
-export default Contact;
+export default ContactPage;

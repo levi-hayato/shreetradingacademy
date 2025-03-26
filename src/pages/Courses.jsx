@@ -39,7 +39,8 @@ export default function Courses() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gray-50  relative overflow-hidden">
+    <div className="py-10 w-full bg-gray-50  relative overflow-hidden">
+    
       {/* Floating Background Shapes */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="animate-float1 w-40 h-40 bg-indigo-200 rounded-full absolute top-10 left-10 opacity-30"></div>
@@ -104,7 +105,7 @@ const CourseCard = ({ course }) => {
       <div className="p-6 bg-white/90 backdrop-blur-md rounded-b-xl">
         {/* Course Name */}
         <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-         {course.name}
+          {course.name}
         </h3>
 
         {/* Course Description */}

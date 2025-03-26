@@ -4,7 +4,6 @@ import Services from './Services'
 import Loader from '../components/Loader'
 import Courses from './Courses'
 import Contact from './Contact'
-import Carousel from '../components/Carousel'
 
 const Home = () => {
 
@@ -23,13 +22,13 @@ const Home = () => {
 
 
     <div className='w-full h-full flex flex-col justify-center items-center dark:bg-gray-300 m-auto p-auto'>
+      
       {isLoading ? <div className='w-[90%] h-[90%] flex justify-center items-center'>
         <Loader />
       </div> :
         <>
           <HeroSection />
           <Services />
-         {/* <Carousel/> */}
           <Courses/>
       <Contact/>
         </>

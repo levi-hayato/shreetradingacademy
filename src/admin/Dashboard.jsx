@@ -10,6 +10,7 @@ import {
   FiCalendar, FiFilter, FiTrendingUp, FiRefreshCw 
 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import { FaHome } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   // State for all data collections
@@ -126,7 +127,7 @@ const AdminDashboard = () => {
   } = getAnalytics();
 
   // Color schemes
-  const COLORS = ['#6366F1', '#8B5CF6', '#EC4899', '#F97316', '#10B981'];
+  const COLORS = ['#0afbf7', '#8B5CF6', '#EC4899', '#F97316', '#10B981'];
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
@@ -139,6 +140,7 @@ const AdminDashboard = () => {
           </div>
           
           <div className="flex items-center gap-3 mt-4 md:mt-0">
+            <button className='bg-btn text-white font-semibold px-3 py-2 rounded-lg shadow-sm border border-gray-200'><FaHome/></button>
             <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-200">
               <FiCalendar className="text-gray-500" />
               <select 
@@ -250,7 +252,7 @@ const AdminDashboard = () => {
                         outerRadius={80}
                         paddingAngle={5}
                         dataKey="revenue"
-                        label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                        label={({ courseID, percent }) => `${courseID} (${(percent * 100).toFixed(0)}%)`}
                       >
                         {popularCourses.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

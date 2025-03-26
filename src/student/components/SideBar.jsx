@@ -19,7 +19,7 @@ import {
     const navigate = useNavigate();
   
     const menuItems = [
-      { name: 'Dashboard', icon: FaHome, path: '/student' },
+      { name: 'Home', icon: FaHome, path: '/student' },
       { name: 'My Courses', icon: FaBook, path: '/student/courses' },
       { name: 'Payments', icon: FaMoneyBill, path: '/student/payments' },
       { name: 'Certificates', icon: FaAward, path: '/student/certificates' },
@@ -77,7 +77,7 @@ import {
             {menuItems.map((item) => {
               const Icon = item.icon;
               return (
-                <li key={item.name}>
+                <li className="font-semibold" key={item.name}>
                   <button
                     onClick={() => handleNavigation(item.path, item.name)}
                     className={`flex items-center w-full p-3 rounded-lg transition-colors duration-200

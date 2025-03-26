@@ -10,6 +10,7 @@ import {
   FiFilter, FiTrendingUp, FiDownload, FiSearch 
 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import TransactionsTable from '../components/TransactionTable';
 
 const Sales = () => {
   const [payments, setPayments] = useState([]);
@@ -283,71 +284,7 @@ const Sales = () => {
         </div>
 
         {/* Transactions Table */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="font-semibold text-gray-800">Recent Transactions</h2>
-            <button className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-800">
-              <FiDownload size={16} />
-              <span>Export</span>
-            </button>
-          </div>
-          
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="text-left text-sm text-gray-500 border-b">
-                    <th className="pb-3">Transaction ID</th>
-                    <th className="pb-3">Customer</th>
-                    <th className="pb-3">Course</th>
-                    <th className="pb-3">Date</th>
-                    <th className="pb-3 text-right">Amount</th>
-                    <th className="pb-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredPayments.slice(0, 10).map((payment) => (
-                    <motion.tr 
-                      key={payment.transactionId}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      whileHover={{ backgroundColor: '#f9fafb' }}
-                      className="border-b border-gray-100"
-                    >
-                      <td className="py-4 text-sm font-medium text-gray-900">
-                        {payment.transactionId}
-                      </td>
-                      <td className="py-4">
-                        <div>
-                          <p className="text-sm font-medium">{payment.name}</p>
-                          <p className="text-xs text-gray-500">{payment.email}</p>
-                        </div>
-                      </td>
-                      <td className="py-4 text-sm text-gray-700">
-                        {payment.courseName}
-                      </td>
-                      <td className="py-4 text-sm text-gray-500">
-                        {payment.date.toLocaleDateString()}
-                      </td>
-                      <td className="py-4 text-sm font-medium text-right">
-                        ₹{payment.price.toLocaleString()}
-                      </td>
-                      <td className="py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs ${STATUS_COLORS.completed}`}>
-                          Completed
-                        </span>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <TransactionsTable filteredPayments={filteredPayments} loading={loading} />
       </div>
     </div>
   );

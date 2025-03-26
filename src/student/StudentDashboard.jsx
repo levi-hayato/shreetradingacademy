@@ -1,19 +1,21 @@
 import { useUser } from "../context/UserContext";
 import StudentIDCard from "./components/StudentIDCard";
 import Layout from "./components/Layout";
+import CourseIntro from "./pages/CourseIntro";
 
 function StudentDashboard() {
   const { user } = useUser();
 
   return (
     // <Layout>
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-100px)]">
-        <div className="w-full max-w-2xl">
-          <StudentIDCard 
+      <div className="flex p-0 m-0 flex-col items-center justify-center min-h-[calc(100vh-100px)]">
+        <div className="w-full">
+          {/* <StudentIDCard 
             email={user?.email} 
             name={user?.name} 
             studentId={user?.studentId}
-          />
+          /> */}
+          <CourseIntro/>
           
           {/* Additional Dashboard Widgets */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
