@@ -29,7 +29,6 @@ const ContactPage = () => {
     setIsSubmitting(true);
 
     try {
-      // Add document to Firestore
       await addDoc(collection(db, 'contacts'), {
         ...formData,
         createdAt: serverTimestamp(),
@@ -37,7 +36,6 @@ const ContactPage = () => {
         resolved: false
       });
 
-      // Show success message
       toast.success('Your message has been sent successfully!', {
         position: "top-center",
         autoClose: 5000,
@@ -48,7 +46,6 @@ const ContactPage = () => {
         progress: undefined,
       });
 
-      // Reset form
       setFormData({
         name: '',
         email: '',
@@ -74,7 +71,7 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-indigo-50 py-8 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
       <ToastContainer />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -82,43 +79,41 @@ const ContactPage = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-8 sm:mb-12"
         >
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Get In Touch</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">Get In Touch</h1>
+          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-2">
             Have questions about our courses? Reach out to us and we'll get back to you as soon as possible.
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
           {/* Contact Form */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white rounded-2xl shadow-xl overflow-hidden"
+            className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl overflow-hidden"
           >
-            <div className="p-8 sm:p-10">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a message</h2>
+            <div className="p-6 sm:p-8 md:p-10">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Send us a message</h2>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                       Full Name *
                     </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                        placeholder="Your name"
-                      />
-                    </div>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      placeholder="Your name"
+                    />
                   </div>
 
                   <div>
@@ -132,7 +127,7 @@ const ContactPage = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                       placeholder="your@email.com"
                     />
                   </div>
@@ -148,7 +143,7 @@ const ContactPage = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                     placeholder="+91 1234567890"
                   />
                 </div>
@@ -164,7 +159,7 @@ const ContactPage = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                     placeholder="What's this about?"
                   />
                 </div>
@@ -176,11 +171,11 @@ const ContactPage = () => {
                   <textarea
                     id="message"
                     name="message"
-                    rows="5"
+                    rows="4"
                     value={formData.message}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                     placeholder="Write your message here..."
                   ></textarea>
                 </div>
@@ -191,7 +186,7 @@ const ContactPage = () => {
                     disabled={isSubmitting}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full flex items-center justify-center px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors duration-300 shadow-md"
+                    className="w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium sm:font-semibold rounded-lg transition-colors duration-300 shadow-md"
                   >
                     {isSubmitting ? (
                       <>
@@ -218,67 +213,67 @@ const ContactPage = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="space-y-8"
+            className="space-y-6 sm:space-y-8"
           >
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <div className="p-8 sm:p-10">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl overflow-hidden">
+              <div className="p-6 sm:p-8 md:p-10">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Contact Information</h2>
                 
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   <div className="flex items-start">
-                    <div className="flex-shrink-0 bg-indigo-100 p-3 rounded-lg mr-4">
-                      <FaPhone className="text-indigo-600 text-xl" />
+                    <div className="flex-shrink-0 bg-indigo-100 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                      <FaPhone className="text-indigo-600 text-lg sm:text-xl" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Phone</h3>
-                      <p className="text-gray-600 mt-1">+91 1234567890</p>
-                      <p className="text-gray-600">Mon-Fri, 9am-6pm</p>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Phone</h3>
+                      <p className="text-sm sm:text-base text-gray-600 mt-1">+91 1234567890</p>
+                      <p className="text-sm sm:text-base text-gray-600">Mon-Fri, 9am-6pm</p>
                     </div>
                   </div>
 
                   <div className="flex items-start">
-                    <div className="flex-shrink-0 bg-indigo-100 p-3 rounded-lg mr-4">
-                      <FaEnvelope className="text-indigo-600 text-xl" />
+                    <div className="flex-shrink-0 bg-indigo-100 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                      <FaEnvelope className="text-indigo-600 text-lg sm:text-xl" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Email</h3>
-                      <p className="text-gray-600 mt-1">contact@shreetradingacademy.com</p>
-                      <p className="text-gray-600">Support: support@shreetradingacademy.com</p>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Email</h3>
+                      <p className="text-sm sm:text-base text-gray-600 mt-1">contact@shreetradingacademy.com</p>
+                      <p className="text-sm sm:text-base text-gray-600">Support: support@shreetradingacademy.com</p>
                     </div>
                   </div>
 
                   <div className="flex items-start">
-                    <div className="flex-shrink-0 bg-indigo-100 p-3 rounded-lg mr-4">
-                      <FaMapMarkerAlt className="text-indigo-600 text-xl" />
+                    <div className="flex-shrink-0 bg-indigo-100 p-2 sm:p-3 rounded-lg mr-3 sm:mr-4">
+                      <FaMapMarkerAlt className="text-indigo-600 text-lg sm:text-xl" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Address</h3>
-                      <p className="text-gray-600 mt-1">123 Trading Street, Financial District</p>
-                      <p className="text-gray-600">Mumbai, Maharashtra 400001</p>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Address</h3>
+                      <p className="text-sm sm:text-base text-gray-600 mt-1">123 Trading Street, Financial District</p>
+                      <p className="text-sm sm:text-base text-gray-600">Mumbai, Maharashtra 400001</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <div className="p-8 sm:p-10">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl overflow-hidden">
+              <div className="p-6 sm:p-8 md:p-10">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Frequently Asked Questions</h2>
                 
-                <div className="space-y-4">
-                  <div className="border-b border-gray-200 pb-4">
-                    <h3 className="text-lg font-medium text-gray-900">How soon will I get a response?</h3>
-                    <p className="text-gray-600 mt-1">We typically respond within 24-48 hours during business days.</p>
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="border-b border-gray-200 pb-3 sm:pb-4">
+                    <h3 className="text-base sm:text-lg font-medium text-gray-900">How soon will I get a response?</h3>
+                    <p className="text-sm sm:text-base text-gray-600 mt-1">We typically respond within 24-48 hours during business days.</p>
                   </div>
 
-                  <div className="border-b border-gray-200 pb-4">
-                    <h3 className="text-lg font-medium text-gray-900">What's the best way to reach support?</h3>
-                    <p className="text-gray-600 mt-1">For urgent matters, please call our support line. For non-urgent queries, email is preferred.</p>
+                  <div className="border-b border-gray-200 pb-3 sm:pb-4">
+                    <h3 className="text-base sm:text-lg font-medium text-gray-900">What's the best way to reach support?</h3>
+                    <p className="text-sm sm:text-base text-gray-600 mt-1">For urgent matters, please call our support line. For non-urgent queries, email is preferred.</p>
                   </div>
 
-                  <div className="border-b border-gray-200 pb-4">
-                    <h3 className="text-lg font-medium text-gray-900">Can I visit your office?</h3>
-                    <p className="text-gray-600 mt-1">Yes, by appointment only. Please contact us to schedule a visit.</p>
+                  <div className="border-b border-gray-200 pb-3 sm:pb-4">
+                    <h3 className="text-base sm:text-lg font-medium text-gray-900">Can I visit your office?</h3>
+                    <p className="text-sm sm:text-base text-gray-600 mt-1">Yes, by appointment only. Please contact us to schedule a visit.</p>
                   </div>
                 </div>
               </div>

@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { FaHome } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
   // State for all data collections
@@ -24,6 +25,8 @@ const AdminDashboard = () => {
   });
   const [dateRange, setDateRange] = useState('month');
   const [activeTab, setActiveTab] = useState('overview');
+
+  const navigate = useNavigate();
 
   // Realtime data fetching
   useEffect(() => {
@@ -140,7 +143,7 @@ const AdminDashboard = () => {
           </div>
           
           <div className="flex items-center gap-3 mt-4 md:mt-0">
-            <button className='bg-btn text-white font-semibold px-3 py-2 rounded-lg shadow-sm border border-gray-200'><FaHome/></button>
+            <button onClick={() => navigate('/')} className='bg-btn text-white font-semibold px-3 py-2 rounded-lg shadow-sm border border-gray-200'><FaHome/></button>
             <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-200">
               <FiCalendar className="text-gray-500" />
               <select 
