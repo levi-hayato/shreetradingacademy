@@ -44,7 +44,7 @@ const Gallery = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6 mb-20">
       <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Photo Gallery</h2>
 
       {/* Loader */}

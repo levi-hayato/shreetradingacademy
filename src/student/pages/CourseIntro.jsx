@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaExpand, FaInfoCircle, FaGraduationCap, FaSchool} from 'react-icons/fa';
 import { MdOutlineSlowMotionVideo, MdOutlineHighQuality } from 'react-icons/md';
 import { RiSpeedFill } from 'react-icons/ri';
+import { useNavigate } from 'react-router-dom';
 
 const CourseIntro = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -16,6 +17,8 @@ const CourseIntro = () => {
   const videoRef = useRef(null);
   const controlsRef = useRef(null);
   const progressRef = useRef(null);
+
+  const navigate = useNavigate();
 
   // Replace with your Google Drive video embed URL
   const videoUrl = "https://drive.google.com/file/d/15yyPBd9T_bbkLNKpcTqoa-JzcBuaInqj/view?usp=sharing";
@@ -292,7 +295,9 @@ const CourseIntro = () => {
               </li>
             </ul>
 
-            <button className="mt-6 w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors duration-300 shadow-md">
+            <button onClick={
+              () => navigate('/content')
+            } className="mt-6 w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors duration-300 shadow-md">
               Enroll Now
             </button>
 

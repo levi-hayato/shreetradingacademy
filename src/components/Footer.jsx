@@ -14,14 +14,14 @@ const Footer = () => {
     aTag.remove();
   };
 
-  const hideNavbarRoutes = ["/login", "/register", "/admin", "/student", "/student/profile", "/student/courses", "/student/payments", "/student/certificates", "/dash", "/dash/sales", "/dash/manage", "/dash/payments" , "/dash/message" , "/dash/students" , "/dash/admins" , "/dash/settings", "/dash/offline"];
+  const hideNavbarRoutes = ["/login", "/content", "/register", "/admin", "/student", "/student/profile", "/student/courses", "/student/payments", "/student/certificates", "/dash", "/dash/sales", "/dash/manage", "/dash/payments" , "/dash/message" , "/dash/students" , "/dash/admins" , "/dash/settings", "/dash/offline"];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
 
   return (
    <>
     {
       !shouldHideNavbar && (
-        <div className="bg-gray-900 mt-20 text-white py-10 px-5 flex flex-col items-center">
+        <div className="bg-gray-900  text-white py-10 px-5 flex flex-col items-center">
         {/* Call-to-Action Section */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-5 w-full max-w-screen-lg p-6 bg-gray-800 shadow-lg rounded-lg transform -translate-y-22">
           <div>

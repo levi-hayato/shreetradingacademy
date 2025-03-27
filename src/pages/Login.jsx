@@ -178,14 +178,13 @@ const Login = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -50 }}
                         transition={{ duration: 0.3 }}
-                        className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center space-x-4 ${
-                            alert.type === "success" 
+                        className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center space-x-4 ${alert.type === "success"
                                 ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
                                 : "bg-rose-100 text-rose-800 border border-rose-200"
-                        }`}
+                            }`}
                     >
                         <div className="font-medium">{alert.message}</div>
-                        <button 
+                        <button
                             onClick={() => setAlert({ ...alert, visible: false })}
                             className="text-current hover:opacity-70"
                         >
@@ -243,11 +242,10 @@ const Login = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className={`w-full flex items-center justify-center py-3 px-4 rounded-lg font-medium text-white transition-all ${
-                                    loading 
+                                className={`w-full flex items-center justify-center py-3 px-4 rounded-lg font-medium text-white transition-all ${loading
                                         ? 'bg-blue-400 cursor-not-allowed'
                                         : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-                                }`}
+                                    }`}
                             >
                                 {loading ? (
                                     <TailSpin color="#ffffff" height={20} width={20} />
@@ -278,7 +276,7 @@ const Login = () => {
                             )}
                         </button>
                         <button onClick={() => navigate('/')} className="w-full flex items-center justify-center mt-4 text-white font-semibold py-3 px-4 rounded-lg hover:text-black border bg-blue-600 border-gray-200 hover:bg-gray-50 transition-all"
-                    > <FaArrowLeft className="mr-2"/> Go Back</button>
+                        > <FaArrowLeft className="mr-2" /> Go Back</button>
                     </div>
 
                     {/* Right Column - Decorative */}
@@ -291,8 +289,8 @@ const Login = () => {
                                 </p>
                                 <div className="flex justify-center">
                                     <div className="w-48 h-48 bg-white/10 rounded-full backdrop-blur-sm animate-morph">
-                                    <div className="w-40 h-40 bg-white/10 rounded-full backdrop-blur-sm animate-morph">
-                                    <div className="w-30 h-30 bg-white/10 rounded-full backdrop-blur-sm animate-morph"></div></div>
+                                        <div className="w-40 h-40 bg-white/10 rounded-full backdrop-blur-sm animate-morph">
+                                            <div className="w-30 h-30 bg-white/10 rounded-full backdrop-blur-sm animate-morph"></div></div>
                                     </div>
                                 </div>
                             </div>
@@ -321,7 +319,7 @@ const Login = () => {
                             <div className="p-6">
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="text-2xl font-bold text-gray-800">Complete Registration</h2>
-                                    <button 
+                                    <button
                                         onClick={() => setShowPopup(false)}
                                         className="text-gray-400 hover:text-gray-600"
                                     >

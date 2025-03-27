@@ -45,8 +45,7 @@ export function UserProvider({ children }) {
                     // Save user data to context and localStorage
                     setUser(userData);
                     localStorage.setItem("user", JSON.stringify(userData));
-                    console.log("User Data saved to context and localStorage:", userData); // Debugging
-                } catch (error) {
+                    } catch (error) {
                     console.error("Error fetching user data from Firestore:", error);
                 }
             } else {

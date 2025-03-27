@@ -38,6 +38,9 @@ import StudentCoursesPage from "./student/pages/StudentCoursesPage";
 import Certificates from "./student/pages/Certificates";
 import CookiesPolicy from "./components/Cookies Policy";
 import OfflinePurchases from "./admin/pages/OfflinePurchases";
+import CourseLessonPage from "./student/pages/CourseLessonPage";
+import InstructorCoursePage from "./pages/InstructorCoursePage";
+import LessonForm from "./pages/LessonForm";
 
 function App() {
   return (
@@ -57,7 +60,13 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/update" element={<ProfileUpdatePage />} />
+            <Route path="/content" element={<CourseLessonPage />} />
             <Route path="/cookiespolicy" element={<CookiesPolicy />} />
+            <Route path="/instructor" element={<InstructorCoursePage />} />
+            <Route path="/lesson" element={<LessonForm />} />
+
+
+
             <Route element={<Layout />}>
               <Route path="/student" element={<StudentDashboard />} />
               <Route path="/student/profile" element={<ProfilePage />} />
