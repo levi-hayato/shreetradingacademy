@@ -201,7 +201,7 @@ const CourseIntro = () => {
                 onClick={togglePlay}
                 className="absolute inset-0 m-auto w-16 h-16 bg-indigo-600/90 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-indigo-700 hover:scale-110"
               >
-                <FaPlay size={24} className="text-white ml-1" />
+                <FaPlay size={24}name className="text-white ml-1" />
               </button>
             )}
           </div>
@@ -298,7 +298,7 @@ const CourseIntro = () => {
             <button onClick={
               () => navigate('/content')
             } className="mt-6 w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors duration-300 shadow-md">
-              Enroll Now
+              Start
             </button>
 
             <div className="mt-4 text-center text-sm text-gray-500">

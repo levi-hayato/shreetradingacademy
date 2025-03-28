@@ -56,7 +56,7 @@ const Navbar = () => {
   return (
     <>
       {!shouldHideNavbar && (
-        <nav className="font-poppins px-8 bg-white dark:bg-gray-600 bg-fresh-shapes bg-cover bg-center">
+        <nav className="font-poppins md:px-8 bg-white dark:bg-gray-600 bg-fresh-shapes bg-cover bg-center">
           <div className="container flex justify-between items-center py-4">
             {/* Logo Section */}
             <div className=" lg-auto">
@@ -212,12 +212,12 @@ const Navbar = () => {
               {/* Mobile Hamburger Menu */}
               {open ? (
                 <FaX
-                  className="text-2xl lg:hidden dark:text-white hover:text-btn transition-all duration-300"
+                  className="text-2xl lg:hidden ml-2.5 dark:text-white hover:text-btn transition-all duration-300"
                   onClick={() => setOpen(!open)}
                 />
               ) : (
                 <MdMenu
-                  className="text-3xl lg:hidden dark:text-white hover:text-btn transition-all duration-300"
+                  className="text-3xl lg:hidden ml-1 dark:text-white hover:text-btn transition-all duration-300"
                   onClick={() => setOpen(!open)}
                 />
               )}

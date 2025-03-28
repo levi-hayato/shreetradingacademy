@@ -6,7 +6,7 @@
 
 @theme{
   
-  
+ 
 
   --font-poppins: Poppins, sans-serif;
 
@@ -14,7 +14,46 @@
   --color-bg: #F9F9FF;
 }
 
+/* Custom base styles */
+@layer base {
+  body {
+    @apply antialiased text-gray-800 bg-gray-50;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom components */
+@layer components {
+  .btn-primary {
+    @apply bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow;
+  }
+}
+
+/* Custom utilities */
 @layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+  }
+  
+  /* Your existing scrollbar styles */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full hover:bg-gray-400;
+  }
+}
+
+@layer utilities {
+  
   @keyframes morph {
     0% {
       border-radius: 50% 50% 50% 50%;
@@ -145,3 +184,11 @@ html{
   scrollbar-width: none;
 }
 
+/* Animation for lesson cards */
+.lesson-card {
+  transition: all 0.3s ease;
+}
+
+.lesson-card:hover {
+  transform: translateY(-2px);
+}

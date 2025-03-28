@@ -131,6 +131,7 @@ const scrollbarStyles = `
               </motion.div>
               <motion.button
                 whileHover={{ rotate: 90, scale: 1.1 }}
+          
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setOpen(false)}
                 className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-all"

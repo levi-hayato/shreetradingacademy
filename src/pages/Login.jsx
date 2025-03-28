@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { db, auth, googleProvider } from "../firebase/firebase";
-import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
-import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc, setDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { useUser } from "../context/UserContext";
 import { FcGoogle } from "react-icons/fc";
-import { FiUser, FiLock, FiCalendar, FiPhone } from "react-icons/fi";
+import { FiUser, FiLock, FiCalendar, FiPhone, FiMail } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,6 +19,7 @@ const Login = () => {
     const [googleLoading, setGoogleLoading] = useState(false);
     const [alert, setAlert] = useState({ type: "", message: "", visible: false });
     const [showPopup, setShowPopup] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
     const [courses, setCourses] = useState([]);
     const [additionalDetails, setAdditionalDetails] = useState({
         mobile: "",
@@ -52,6 +53,22 @@ const Login = () => {
         setTimeout(() => setAlert({ ...alert, visible: false }), 4000);
     };
 
+    const handleForgotPassword = async () => {
+        if (!email) {
+            showAlert("error", "Please enter your email address first");
+            return;
+        }
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            showAlert("success", "Password reset link sent to your email!");
+            setShowForgotPassword(false);
+        } catch (error) {
+            console.error("Password reset error:", error);
+            showAlert("error", "Failed to send reset email. Please check your email address.");
+        }
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -59,7 +76,11 @@ const Login = () => {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-            const studentDoc = await getDoc(doc(db, "students", user.uid));
+            
+            // Fetch student data by email instead of UID
+            const studentsRef = collection(db, "students");
+            const q = query(studentsRef, where("email", "==", user.email));
+            const querySnapshot = await getDocs(q);
 
             let userData = {
                 uid: user.uid,
@@ -73,7 +94,8 @@ const Login = () => {
                 duration: "",
             };
 
-            if (studentDoc.exists()) {
+            if (!querySnapshot.empty) {
+                const studentDoc = querySnapshot.docs[0];
                 const studentInfo = studentDoc.data();
                 userData.studentId = studentInfo.studentId || "";
                 userData.mobile = studentInfo.mobile || "";
@@ -102,7 +124,11 @@ const Login = () => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             const user = result.user;
-            const userDoc = await getDoc(doc(db, "students", user.uid));
+            
+            // Fetch student data by email for Google sign-in too
+            const studentsRef = collection(db, "students");
+            const q = query(studentsRef, where("email", "==", user.email));
+            const querySnapshot = await getDocs(q);
 
             let userData = {
                 uid: user.uid,
@@ -116,13 +142,14 @@ const Login = () => {
                 duration: "",
             };
 
-            if (userDoc.exists()) {
-                const userInfo = userDoc.data();
-                userData.studentId = userInfo.studentId || "";
-                userData.mobile = userInfo.mobile || "";
-                userData.course = userInfo.course || "";
-                userData.price = userInfo.price || "";
-                userData.duration = userInfo.duration || "";
+            if (!querySnapshot.empty) {
+                const studentDoc = querySnapshot.docs[0];
+                const studentInfo = studentDoc.data();
+                userData.studentId = studentInfo.studentId || "";
+                userData.mobile = studentInfo.mobile || "";
+                userData.course = studentInfo.course || "";
+                userData.price = studentInfo.price || "";
+                userData.duration = studentInfo.duration || "";
                 setUser(userData);
                 localStorage.setItem("user", JSON.stringify(userData));
                 showAlert("success", "Google Login successful!");
@@ -237,6 +264,16 @@ const Login = () => {
                                         required
                                     />
                                 </div>
+                            </div>
+
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowForgotPassword(true)}
+                                    className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                                >
+                                    Forgot Password?
+                                </button>
                             </div>
 
                             <button
@@ -385,6 +422,66 @@ const Login = () => {
                                         Complete Registration
                                     </button>
                                 </form>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Forgot Password Popup */}
+            <AnimatePresence>
+                {showForgotPassword && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        onClick={() => setShowForgotPassword(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="p-6">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-2xl font-bold text-gray-800">Reset Password</h2>
+                                    <button
+                                        onClick={() => setShowForgotPassword(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <IoClose size={24} />
+                                    </button>
+                                </div>
+
+                                <p className="text-gray-500 mb-6">
+                                    Enter your email address and we'll send you a link to reset your password
+                                </p>
+
+                                <div className="space-y-4">
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <FiMail className="text-gray-400" />
+                                        </div>
+                                        <input
+                                            type="email"
+                                            placeholder="Your Email Address"
+                                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+
+                                    <button
+                                        onClick={handleForgotPassword}
+                                        className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                    >
+                                        Send Reset Link
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     </motion.div>
