@@ -4,9 +4,7 @@ import {
     FaMoneyBill, 
     FaSignOutAlt,
     FaHome,
-    FaChartLine,
-    FaCalendarAlt,
-    FaFileAlt,
+  
     FaAward,
     FaTimes,
     FaBars
