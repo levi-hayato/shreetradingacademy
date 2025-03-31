@@ -18,7 +18,7 @@ import {
   
     const menuItems = [
       { name: 'Home', icon: FaHome, path: '/student' },
-      { name: 'My Courses', icon: FaBook, path: '/student/courses' },
+      { name: 'My Courses', icon: FaBook, path: '/student/mycourses' },
       { name: 'Payments', icon: FaMoneyBill, path: '/student/payments' },
       { name: 'Certificates', icon: FaAward, path: '/student/certificates' },
       { name: 'Profile', icon: FaUser, path: '/student/profile' },

@@ -50,14 +50,33 @@ const Navbar = () => {
   };
 
   // Define routes where Navbar should be hidden
-  const hideNavbarRoutes = ["/content", "/login", "/register", "/admin", "/student", "/student/profile", "/student/courses", "/student/payments", "/student/certificates", "/dash", "/dash/sales", "/dash/manage", "/dash/payments", "/dash/message", "/dash/students", "/dash/admins", "/dash/settings", "/dash/offline"];
-  const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
+  const hideNavbarRoutes = [
+    "/login",
+    "/register",
+    "/admin",
+    "/student",
+    "/student/*",
+    "/dash",
+    "/dash/*",
+    "/content/*",
+    "/course/*"  // Added this to hide footer on course pages
+  ];
 
+  const shouldHideNavbar = hideNavbarRoutes.some(route => {
+    const routePattern = new RegExp(
+      `^${route.replace(/\*/g, '.*').replace(/\/$/, '')}$`
+    );
+    return routePattern.test(location.pathname);
+  });
+
+  if (shouldHideNavbar) {
+    return null;
+  }
   return (
     <>
       {!shouldHideNavbar && (
-        <nav className="font-poppins md:px-8 bg-white dark:bg-gray-600 bg-fresh-shapes bg-cover bg-center">
-          <div className="container flex justify-between items-center py-4">
+        <nav className="font-poppins flex justify-center w-full md:px-8 bg-white dark:bg-gray-600 bg-fresh-shapes bg-cover bg-center">
+          <div className="container w-full flex justify-between items-center py-4">
             {/* Logo Section */}
             <div className=" lg-auto">
               <img className="w-30 size-14" src="https://desk-on-fire-store.com/assets/logo.png" alt="Logo" />

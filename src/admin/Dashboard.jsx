@@ -41,7 +41,7 @@ const AdminDashboard = () => {
 
     // Courses collection
     const coursesUnsub = onSnapshot(
-      query(collection(db, 'courses'), orderBy('createdAt', 'desc')),
+      query(collection(db, 'courseData'), orderBy('createdAt', 'desc')),
       (snapshot) => {
         setCourses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         setLoading(prev => ({ ...prev, courses: false }));

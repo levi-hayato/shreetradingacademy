@@ -42,6 +42,11 @@ import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from 'react-hot-toast';
 import CourseContent from "./lms/pages/CourseContent";
 import InstructorDashboard from "./lms/pages/InstructorDashboard";
+import TextEditorPage from "./pages/Editor";
+import ContentViewPage from "./pages/ContentViewPage";
+import CourseIntro from "./student/pages/CourseIntro";
+import MyCourses from "./student/pages/MyCoursePage";
+
 
 
 
@@ -67,14 +72,17 @@ function App() {
               <Route path="/admin" element={<AdminLogin />} />
               <Route path="/update" element={<ProfileUpdatePage />} />
               <Route path="/cookiespolicy" element={<CookiesPolicy />} />
-              <Route path="/content" element={<CourseContent />} />
-              <Route path="/add" element={<InstructorDashboard />} />
+              <Route path="/content/:courseID" element={<CourseContent />} />
+              <Route path="/edi" element={<TextEditorPage />} />
+              <Route path="/view" element={<ContentViewPage />} />
+              
            
               <Route element={<Layout />}>
                 <Route path="/student" element={<StudentDashboard />} />
                 <Route path="/student/profile" element={<ProfilePage />} />
                 <Route path="/student/payments" element={<StudentPaymentPage />} />
-                <Route path="/student/courses" element={<StudentCoursesPage />} />
+                <Route path="/student/course/:courseID" element={<CourseIntro/>} />
+                <Route path="/student/mycourses" element={<MyCourses/>} />
                 <Route path="/student/certificates" element={<Certificates />} />
               </Route>
 
@@ -91,7 +99,7 @@ function App() {
                           icon={<FaUsers />}
                           text="Manage"
                           dropdownItems={[
-                            { text: "Courses", to: "/dash/manage", icon: <FaUsers /> },
+                            { text: "Courses", to: "/dash/add", icon: <FaUsers /> },
                             { text: "Admins", to: "/dash/admins", icon: <FaPersonCircleCheck /> },
                             { text: "Students", to: "/dash/students", icon: <FaChild /> },
                           ]}
@@ -108,6 +116,7 @@ function App() {
                           <Route path="/users" element={<Users />} />
                           <Route path="/payments" element={<Payments />} />
                           <Route path="/manage" element={<AddCourse />} />
+                          <Route path="/add" element={<InstructorDashboard />} />
                           <Route path="/message" element={<MessagesPage />} />
                           <Route path="/students" element={<StudentsTable />} />
                           <Route path="/admins" element={<AdminsTable />} />

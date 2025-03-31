@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/firebase'; // Your Firebase config
+import { db } from '../firebase/firebase';
 import { FaStar, FaClock, FaRupeeSign, FaChartLine, FaBookOpen } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,10 +15,12 @@ const CoursesPage = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'courses'));
+        const querySnapshot = await getDocs(collection(db, 'courseData'));
         const coursesData = querySnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
+          // Ensure features always exists as an array
+          features: doc.data().features || []
         }));
         setCourses(coursesData);
         setLoading(false);
@@ -33,7 +35,11 @@ const CoursesPage = () => {
 
   const filteredCourses = activeTab === 'all'
     ? courses
-    : courses.filter(course => course.features.includes(activeTab));
+    : courses.filter(course => 
+        course.features && 
+        Array.isArray(course.features) && 
+        course.features.includes(activeTab)
+      );
 
   const courseVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -41,8 +47,13 @@ const CoursesPage = () => {
     hover: { scale: 1.03, transition: { duration: 0.3 } }
   };
 
+  // Safe access to course features
+  const getCourseFeatures = (course) => {
+    return course?.features || [];
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br  from-[#f8f9fa] to-[#e9ecef] py-12 px-4 sm:px-6 lg:px-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#f8f9fa] to-[#e9ecef] py-12 px-4 sm:px-6 lg:px-50">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -65,10 +76,11 @@ const CoursesPage = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2 rounded-full font-medium ${activeTab === tab
+              className={`px-6 py-2 rounded-full font-medium ${
+                activeTab === tab
                   ? 'bg-[#6254f3] text-white'
                   : 'bg-white text-[#4a5568] hover:bg-gray-100'
-                } shadow-sm`}
+              } shadow-sm`}
             >
               {tab === 'all' ? 'All Courses' : tab}
             </motion.button>
@@ -91,12 +103,12 @@ const CoursesPage = () => {
                   animate="visible"
                   whileHover="hover"
                   transition={{ duration: 0.5 }}
-                  className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer"
+                  className="bg-white  rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer"
                   onClick={() => setSelectedCourse(course)}
                 >
                   <div className="relative h-48 overflow-hidden">
                     <img
-                      src={course.banner}
+                      src={course.banner || '/default-course-banner.jpg'}
                       alt={course.name}
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                     />
@@ -104,30 +116,35 @@ const CoursesPage = () => {
                       <h3 className="text-white font-bold text-xl">{course.name}</h3>
                     </div>
                   </div>
-                  <div className="p-6">
+                  <div className="p-6 ">
                     <div className="flex items-center mb-3">
                       <FaStar className="text-yellow-400 mr-1" />
                       <span className="text-sm font-medium text-gray-600">4.8 (120 reviews)</span>
                     </div>
                     <p className="text-gray-600 mb-4 line-clamp-2">{course.description}</p>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {course.features.map((feature, index) => (
-                        <span
-                          key={index}
-                          className="bg-[#6254f3]/10 text-[#6254f3] text-xs px-3 py-1 rounded-full"
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex justify-between items-center">
+  {getCourseFeatures(course).slice(0, 3).map((feature, index) => (
+    <span
+      key={index}
+      className="bg-[#6254f3]/10 text-[#6254f3] text-xs px-3 py-1 rounded-full"
+    >
+      {feature}
+    </span>
+  ))}
+  {getCourseFeatures(course).length > 3 && (
+    <span className="bg-[#6254f3]/10 text-[#6254f3] text-xs px-3 py-1 rounded-full">
+      +{getCourseFeatures(course).length - 3} more
+    </span>
+  )}
+</div>
+                    <div className="flex justify-between self-baseline items-center">
                       <div className="flex items-center text-gray-600">
                         <FaClock className="mr-1" />
-                        <span>{course.duration}</span>
+                        <span>{course.duration || 'N/A'} Months</span>
                       </div>
                       <div className="text-lg font-bold text-[#6254f3]">
                         <FaRupeeSign className="inline mr-1" />
-                        {course.price}
+                        {course.price || '0'}
                       </div>
                     </div>
                   </div>
@@ -135,7 +152,6 @@ const CoursesPage = () => {
               ))}
             </div>
 
-           
             {/* Course Modal */}
             {selectedCourse && (
               <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -144,7 +160,6 @@ const CoursesPage = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
                 >
-                  {/* Custom scroll container to hide scrollbar */}
                   <div className="overflow-y-auto scrollbar-hide flex-1">
                     {/* Header with close button */}
                     <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 flex justify-end">
@@ -169,10 +184,10 @@ const CoursesPage = () => {
                       </button>
                     </div>
 
-                    {/* Course Banner with decorative elements */}
+                    {/* Course Banner */}
                     <div className="relative h-64 overflow-hidden">
                       <img
-                        src={selectedCourse.banner}
+                        src={selectedCourse.banner || '/default-course-banner.jpg'}
                         alt={selectedCourse.name}
                         className="w-full h-full object-cover"
                       />
@@ -188,25 +203,21 @@ const CoursesPage = () => {
                           </div>
                           <div className="flex items-center text-white/90">
                             <FaClock className="mr-1" />
-                            <span>{selectedCourse.duration}</span>
+                            <span>{selectedCourse.duration || 'N/A'}</span>
                           </div>
                         </div>
                       </div>
-
-                      {/* Decorative corner elements */}
-                      <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-white/50" />
-                      <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-white/50" />
                     </div>
 
                     {/* Course Content */}
                     <div className="p-6 sm:p-8">
-                      {/* Price and CTA - Sticky at bottom */}
+                      {/* Price and CTA */}
                       <div className="sticky bottom-0 bg-white border-t border-gray-200 -mx-6 sm:-mx-8 px-6 sm:px-8 py-4">
                         <div className="flex flex-col sm:flex-row justify-between items-center">
                           <div>
                             <div className="text-2xl font-bold text-[#6254f3]">
                               <FaRupeeSign className="inline mr-1" />
-                              {selectedCourse.price}
+                              {selectedCourse.price || '0'}
                               <span className="text-sm font-normal text-gray-500 ml-2">one-time payment</span>
                             </div>
                           </div>
@@ -228,7 +239,7 @@ const CoursesPage = () => {
                           Course Description
                         </h3>
                         <p className="text-gray-700 leading-relaxed">
-                          {selectedCourse.description}
+                          {selectedCourse.description || 'No description available'}
                         </p>
                       </div>
 
@@ -239,39 +250,37 @@ const CoursesPage = () => {
                           What You'll Learn
                         </h3>
                         <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {selectedCourse.features.map((feature, index) => (
-                            <motion.li
-                              key={index}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              className="flex items-start bg-gray-50 p-4 rounded-lg"
-                            >
-                              <div className="bg-[#6254f3]/10 p-1 rounded-full mr-3">
-                                <svg
-                                  className="h-5 w-5 text-[#6254f3]"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M5 13l4 4L19 7"
-                                  />
-                                </svg>
-                              </div>
-                              <span className="text-gray-700">{feature}</span>
-                            </motion.li>
-                          ))}
+                          {getCourseFeatures(selectedCourse).length > 0 ? (
+                            getCourseFeatures(selectedCourse).map((feature, index) => (
+                              <motion.li
+                                key={index}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className="flex items-start bg-gray-50 p-4 rounded-lg"
+                              >
+                                <div className="bg-[#6254f3]/10 p-1 rounded-full mr-3">
+                                  <svg
+                                    className="h-5 w-5 text-[#6254f3]"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M5 13l4 4L19 7"
+                                    />
+                                  </svg>
+                                </div>
+                                <span className="text-gray-700">{feature}</span>
+                              </motion.li>
+                            ))
+                          ) : (
+                            <p className="text-gray-500">No features listed for this course</p>
+                          )}
                         </ul>
-                      </div>
-
-                      {/* Decorative elements */}
-                      <div className="relative">
-                        <div className="absolute -left-8 top-1/2 w-16 h-16 bg-[#6254f3]/10 rounded-full blur-lg" />
-                        <div className="absolute -right-8 bottom-1/2 w-16 h-16 bg-[#a04ff3]/10 rounded-full blur-lg" />
                       </div>
                     </div>
                   </div>

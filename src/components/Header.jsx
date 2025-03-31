@@ -3,7 +3,9 @@ import Navbar from './Navbar'
 
 const Header = () => {
   return (
-   <Navbar/>
+   <div className='w-full  flex items-center justify-center '>
+    <Navbar/>
+   </div>
   )
 }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { db } from "../firebase/firebase";
-import { doc, getDoc, collection, addDoc } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc, updateDoc, arrayUnion, setDoc } from "firebase/firestore";
 import { 
   FaBook, FaClock, FaCheckCircle, FaMoneyBillWave, 
   FaUser, FaIdBadge, FaIdCard, FaRegCreditCard, FaStore 
@@ -30,7 +30,7 @@ export default function CourseDetails() {
 
     const fetchCourse = async () => {
       try {
-        const docRef = doc(db, "courses", id);
+        const docRef = doc(db, "courseData", id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setCourse({ id: docSnap.id, ...docSnap.data() });
@@ -46,20 +46,60 @@ export default function CourseDetails() {
     fetchCourse();
   }, [id, user, navigate]);
 
+  const handleEnrollment = async (paymentMethod, paymentId = null) => {
+    try {
+      const studentRef = doc(db, "students", user.uid);
+      
+      await setDoc(studentRef, {
+        enrollments: arrayUnion({
+          courseId: id,
+          courseDocId: course.id,
+          course: course.name,
+          enrolledAt: new Date(),
+          status: paymentMethod === "COD" ? "pending" : "active",
+          paymentMethod,
+          paymentId,
+          price: course.price
+        }),
+        lastUpdated: new Date()
+      }, { merge: true });
+
+      return true;
+    } catch (error) {
+      console.error("Error updating enrollments:", error);
+      return false;
+    }
+  };
+
   const handleCOD = async () => {
     setProcessingPayment(true);
     try {
+      // Create offline purchase record
       await addDoc(collection(db, "offlinepurchase"), {
         uid: user.uid,
         courseId: id,
-        courseName: course.name,
+        course: course.name,
+        duration:course.duration,
         name: user.displayName || "User Name",
         email: user.email,
         price: course.price,
         date: new Date(),
         status: "Pending Payment",
       });
-      navigate("/student", { state: { success: "Your order has been placed successfully!" } });
+
+      // Update student enrollments
+      const enrollmentSuccess = await handleEnrollment("COD");
+      
+      if (enrollmentSuccess) {
+        navigate("/student", { 
+          state: { 
+            success: "Your order has been placed successfully!",
+            newEnrollment: true
+          } 
+        });
+      } else {
+        throw new Error("Failed to update enrollments");
+      }
     } catch (error) {
       console.error("Error processing COD:", error);
       alert("Something went wrong! Please try again.");
@@ -81,17 +121,37 @@ export default function CourseDetails() {
         description: course.name,
         image: "/logo.png",
         handler: async (response) => {
-          await addDoc(collection(db, "payments"), {
-            uid: user.uid,
-            courseId: id,
-            courseName: course.name,
-            name: user.name,
-            email: user.email,
-            price: course.price,
-            transactionId: response.razorpay_payment_id,
-            date: new Date(),
-          });
-          navigate("/student", { state: { success: "Payment successful!" } });
+          try {
+            // Create payment record
+            await addDoc(collection(db, "payments"), {
+              uid: user.uid,
+              courseId: id,
+              course: course.name,
+              name: user.name,
+              email: user.email,
+              price: course.price,
+              transactionId: response.razorpay_payment_id,
+              date: new Date(),
+              status: "completed"
+            });
+
+            // Update student enrollments
+            const enrollmentSuccess = await handleEnrollment("online", response.razorpay_payment_id);
+            
+            if (enrollmentSuccess) {
+              navigate("/student", { 
+                state: { 
+                  success: "Payment successful!",
+                  newEnrollment: true
+                } 
+              });
+            } else {
+              throw new Error("Failed to update enrollments");
+            }
+          } catch (error) {
+            console.error("Error after payment:", error);
+            alert("Payment processed but enrollment failed. Please contact support.");
+          }
         },
         prefill: {
           name: user.name || "User Name",
@@ -102,8 +162,9 @@ export default function CourseDetails() {
       };
 
       const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", () => {
-        alert("Payment failed. Please try again.");
+      rzp.on("payment.failed", (response) => {
+        console.error("Payment failed:", response.error);
+        alert(`Payment failed: ${response.error.description}`);
       });
       rzp.open();
     } catch (error) {
@@ -188,6 +249,10 @@ export default function CourseDetails() {
               {course.description}
             </p>
           </motion.div>
+
+          <button
+          onClick={() => console.log(user)}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">Print User</button>
 
           {/* Course Features */}
           <motion.div
@@ -292,18 +357,27 @@ export default function CourseDetails() {
                       className="overflow-hidden"
                     >
                       <div className="mt-4 space-y-3">
-                        <button className="w-full flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <button 
+                          onClick={() => setCodEnabled(false)}
+                          className="w-full flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                        >
                           <div className="flex items-center">
                             <FaRegCreditCard className="text-blue-500 mr-3" />
                             <span>Credit/Debit Card</span>
                           </div>
                           <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Popular</span>
                         </button>
-                        <button className="w-full flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <button 
+                          onClick={() => setCodEnabled(false)}
+                          className="w-full flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                        >
                           <img src="/upi-icon.png" alt="UPI" className="w-6 h-6 mr-3" />
                           <span>UPI Payment</span>
                         </button>
-                        <button className="w-full flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <button 
+                          onClick={() => setCodEnabled(false)}
+                          className="w-full flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                        >
                           <img src="/netbanking-icon.png" alt="Net Banking" className="w-6 h-6 mr-3" />
                           <span>Net Banking</span>
                         </button>

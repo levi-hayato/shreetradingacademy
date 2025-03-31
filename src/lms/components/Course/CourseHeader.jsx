@@ -5,7 +5,7 @@ const CourseHeader = ({ selectedCourse, progress }) => {
     <header className="bg-white shadow-sm p-4 sticky top-0 z-10">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-0">
         <div>
-          <h1 className="md:text-2xl text-xl font-bold text-gray-800">{selectedCourse.title}</h1>
+          <h1 className="md:text-2xl text-xl font-bold text-gray-800">{selectedCourse.name}</h1>
           <p className="text-sm text-gray-600">Instructor: {selectedCourse.instructor}</p>
         </div>
         

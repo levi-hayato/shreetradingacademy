@@ -51,7 +51,7 @@ const Sales = () => {
   const filteredPayments = payments.filter(payment => 
     payment.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     payment.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    payment.courseName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    payment.course?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     payment.transactionId?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -70,7 +70,7 @@ const Sales = () => {
 
     // Group by course for pie chart
     const courseData = payments.reduce((acc, payment) => {
-      const course = payment.courseName || 'Unknown';
+      const course = payment.course || 'Unknown';
       if (!acc[course]) {
         acc[course] = { name: course, value: 0 };
       }

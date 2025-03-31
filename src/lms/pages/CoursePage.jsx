@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase/firebase';
 import { MainLayout } from '../components/Layout/MainLayout';
 import CourseHeader from '../components/Course/CourseHeader';
@@ -7,22 +7,25 @@ import LessonCard from '../components/Course/LessonCard';
 import ResourceCard from '../components/Course/ResourceCard';
 import {
   FiDownload, FiBookOpen, FiCode, FiFileText, FiClock,
-  FiPlay, FiChevronLeft, FiChevronRight
+  FiPlay, FiChevronLeft, FiChevronRight, FiBook
 } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 const CoursePage = ({ setIsInstructor }) => {
   const [activeChapter, setActiveChapter] = useState(0);
   const [activeLesson, setActiveLesson] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [expandedChapters, setExpandedChapters] = useState([0]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { courseID } = useParams();
 
+  // Check screen size and adjust sidebar state
   useEffect(() => {
     const checkScreenSize = () => {
       const mobile = window.innerWidth < 768;
@@ -37,29 +40,43 @@ const CoursePage = ({ setIsInstructor }) => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  // Fetch course data when courseID changes
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchCourse = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'courseData'));
-        const coursesData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setCourses(coursesData);
-        if (coursesData.length > 0) {
-          setSelectedCourse(coursesData[0]);
+        setLoading(true);
+        setError(null);
+
+        if (!courseID) {
+          throw new Error('No course ID provided');
         }
-      } catch (error) {
-        console.error("Error fetching courses: ", error);
+
+        const docRef = doc(db, 'courseData', courseID);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setSelectedCourse({
+            id: docSnap.id,
+            ...docSnap.data()
+          });
+        } else {
+          throw new Error('Course not found');
+        }
+      } catch (err) {
+        console.error("Error fetching course: ", err);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    fetchCourses();
-  }, []);
+    
+    if (courseID) {
+      fetchCourse();
+    }
+  }, [courseID]);
 
   const handleLessonClick = (chapterIndex, lessonIndex) => {
-    if (!selectedCourse || !selectedCourse.chapters?.[chapterIndex]?.lessons?.[lessonIndex]) {
+    if (!selectedCourse?.chapters?.[chapterIndex]?.lessons?.[lessonIndex]) {
       console.error("Invalid lesson selection");
       return;
     }
@@ -67,16 +84,6 @@ const CoursePage = ({ setIsInstructor }) => {
     setActiveChapter(chapterIndex);
     setActiveLesson(lessonIndex);
     if (isMobile) setSidebarOpen(false);
-
-    // Mark lesson as started if not already
-    const updatedCourses = [...courses];
-    if (
-      updatedCourses[chapterIndex]?.lessons?.[lessonIndex] &&
-      !updatedCourses[chapterIndex].lessons[lessonIndex].started
-    ) {
-      updatedCourses[chapterIndex].lessons[lessonIndex].started = true;
-      setCourses(updatedCourses);
-    }
   };
 
   const goToNextChapter = () => {
@@ -85,8 +92,8 @@ const CoursePage = ({ setIsInstructor }) => {
     const nextChapter = activeChapter + 1;
     if (nextChapter < selectedCourse.chapters.length) {
       setActiveChapter(nextChapter);
-      setActiveLesson(0); // Reset to first lesson of new chapter
-      setExpandedChapters(prev => [...prev, nextChapter]); // Expand new chapter
+      setActiveLesson(0);
+      setExpandedChapters(prev => [...prev, nextChapter]);
     }
   };
 
@@ -94,7 +101,7 @@ const CoursePage = ({ setIsInstructor }) => {
     const prevChapter = activeChapter - 1;
     if (prevChapter >= 0) {
       setActiveChapter(prevChapter);
-      setActiveLesson(0); // Reset to first lesson of previous chapter
+      setActiveLesson(0);
     }
   };
 
@@ -124,8 +131,8 @@ const CoursePage = ({ setIsInstructor }) => {
 
   const handleNextChapter = (nextChapterIndex) => {
     setActiveChapter(nextChapterIndex);
-    setActiveLesson(0); // Reset to first lesson of new chapter
-    setExpandedChapters(prev => [...prev, nextChapterIndex]); // Expand new chapter
+    setActiveLesson(0);
+    setExpandedChapters(prev => [...prev, nextChapterIndex]);
   };
 
   const calculateCourseProgress = () => {
@@ -152,13 +159,26 @@ const CoursePage = ({ setIsInstructor }) => {
     );
   }
 
-  if (!selectedCourse) {
+  if (error || !selectedCourse) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-center p-6 max-w-md">
-          <h2 className="text-xl font-bold text-gray-800">No Course Available</h2>
-          <p className="mt-2 text-gray-600">Please check back later or contact support.</p>
-          <button onClick={() => { navigate("/") }} className=' px-4 py-2 mt-3 bg-btn text-white font-bold rounded-xl' >Go Back</button>
+        <div className="text-center p-6 max-w-md bg-white rounded-xl shadow-md">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Error Loading Course</h2>
+          <p className="text-gray-600 mb-6">{error || 'Course data not available'}</p>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => navigate('/courses')}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Browse Courses
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -185,21 +205,18 @@ const CoursePage = ({ setIsInstructor }) => {
         progress={calculateCourseProgress()}
       />
 
-      <main className="p-6">
-        {selectedCourse.chapters?.[activeChapter] && (
-          <div>
-            {/* Chapter Navigation Buttons */}
-            
-
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
+      <main className="p-4 md:p-6">
+        {selectedCourse.chapters?.[activeChapter] ? (
+          <div className="space-y-6">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
               <div>
                 <h2 className="text-xl font-bold text-gray-800">
-                  {selectedCourse.chapters[activeChapter].title} {selectedCourse.chapters[activeChapter].lessons?.title}
+                  {selectedCourse.chapters[activeChapter].title}
                 </h2>
-                <p className="text-gray-400 flex items-center">
+                <p className="text-gray-500 flex items-center mt-1">
                   <FiClock className="mr-1" />
                   {selectedCourse.chapters[activeChapter].duration}
-                  <p className='mx-3 '>• {selectedCourse.chapters[activeChapter].lessons?.length || 0} items</p>
+                  <span className="mx-3">• {selectedCourse.chapters[activeChapter].lessons?.length || 0} items</span>
                 </p>
               </div>
               <button
@@ -210,56 +227,64 @@ const CoursePage = ({ setIsInstructor }) => {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-6">
-              {selectedCourse.chapters[activeChapter].lessons?.map((lesson, lessonIndex) => (
-                <LessonCard
-                  key={lessonIndex}
-                  lesson={lesson}
-                  onClick={handleLessonClick}
-                  getLessonIcon={getLessonIcon}
-                  getLessonIconColor={getLessonIconColor}
-                  isCurrentLesson={activeLesson === lessonIndex}
-                  chapterIndex={activeChapter}
-                  lessonIndex={lessonIndex}
-                  totalLessonsInChapter={selectedCourse.chapters[activeChapter].lessons.length}
-                  totalChapters={selectedCourse.chapters.length}
-                  onNextLesson={handleNextLesson}
-                  onNextChapter={handleNextChapter}
-                />
-              ))}
-            </div>
-            <div className="flex justify-between mt-6 px-2">
+            {selectedCourse.chapters[activeChapter].lessons?.length > 0 ? (
+              <div className="space-y-4">
+                {selectedCourse.chapters[activeChapter].lessons.map((lesson, lessonIndex) => (
+                  <LessonCard
+                    key={lessonIndex}
+                    lesson={lesson}
+                    onClick={() => handleLessonClick(activeChapter, lessonIndex)}
+                    getLessonIcon={getLessonIcon}
+                    getLessonIconColor={getLessonIconColor}
+                    isCurrentLesson={activeLesson === lessonIndex}
+                    chapterIndex={activeChapter}
+                    lessonIndex={lessonIndex}
+                    totalLessonsInChapter={selectedCourse.chapters[activeChapter].lessons.length}
+                    totalChapters={selectedCourse.chapters.length}
+                    onNextLesson={handleNextLesson}
+                    onNextChapter={handleNextChapter}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">No lessons available in this chapter</p>
+              </div>
+            )}
+
+            <div className="flex justify-between mt-6">
               <button
                 onClick={goToPrevChapter}
                 disabled={activeChapter === 0}
-                className={`flex items-center px-4 py-2 rounded-lg ${activeChapter === 0
+                className={`flex items-center px-4 py-2 rounded-lg ${
+                  activeChapter === 0
                     ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                     : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                  }`}
+                }`}
               >
                 <FiChevronLeft className="mr-2" />
-                <div className='hidden md:block'>Previous Chapter</div>
+                <span className="hidden md:inline">Previous Chapter</span>
               </button>
 
               <button
                 onClick={goToNextChapter}
                 disabled={activeChapter === selectedCourse.chapters.length - 1}
-                className={`flex items-center px-4 py-2 rounded-lg ${activeChapter === selectedCourse.chapters.length - 1
+                className={`flex items-center px-4 py-2 rounded-lg ${
+                  activeChapter === selectedCourse.chapters.length - 1
                     ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                     : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                  }`}
+                }`}
               >
-                <div className='hidden md:block'>Next Chapter</div>
-
+                <span className="hidden md:inline">Next Chapter</span>
                 <FiChevronRight className="ml-2" />
               </button>
             </div>
 
-            <div className="mt-12">
-              <h3 className="font-bold text-xl mb-6 text-gray-800 flex items-center">
+            <div className="mt-8">
+              <h3 className="font-bold text-xl mb-4 text-gray-800 flex items-center">
                 <FiDownload className="mr-2" /> Chapter Resources
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <ResourceCard
                   title="Lecture Slides"
                   type="PDF Document"
@@ -281,11 +306,18 @@ const CoursePage = ({ setIsInstructor }) => {
               </div>
             </div>
           </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-500">No chapter data available</p>
+          </div>
         )}
-        
       </main>
     </MainLayout>
   );
+};
+
+CoursePage.propTypes = {
+  setIsInstructor: PropTypes.func.isRequired
 };
 
 export default CoursePage;

@@ -27,7 +27,7 @@ const ChapterList = ({
       
       <div className="mt-2 space-y-1">
         {selectedCourse.chapters?.map((chapter, chapterIndex) => (
-          <div key={chapterIndex} className="mb-1">
+          <div key={chapterIndex} className="mb-1 truncate">
             <button
               onClick={() => toggleChapter(chapterIndex)}
               className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
@@ -37,14 +37,14 @@ const ChapterList = ({
               }`}
             >
               <div className="flex items-center">
-                <span className={`w-6 h-6 flex items-center justify-center rounded-full mr-3 ${
+                <span className={`w-6 h-6 flex items-center justify-center truncate rounded-full mr-3 ${
                   activeChapter === chapterIndex 
                     ? 'bg-indigo-100 text-indigo-600 font-medium' 
                     : 'bg-gray-100 text-gray-600'
                 }`}>
                   {chapterIndex + 1}
                 </span>
-                <span className="truncate text-sm font-medium">{chapter.title}</span>
+                <span className=" text-sm font-medium ">{chapter.title}</span>
               </div>
               <FiChevronDown 
                 size={16} 

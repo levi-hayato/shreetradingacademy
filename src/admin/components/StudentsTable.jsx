@@ -21,7 +21,12 @@ export default function StudentsTable() {
         const querySnapshot = await getDocs(collection(db, "students"));
         const studentsData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
+          name: doc.data().name || 'Unknown', // Default name
+          email: doc.data().email || '',
+          course: doc.data().course || '',
+          contact: doc.data().contact || doc.data().mobile || 'N/A',
+          studentId: doc.data().studentId || '',
+          photo: doc.data().photo || ''
         }));
         setStudents(studentsData);
       } catch (error) {
@@ -42,11 +47,13 @@ export default function StudentsTable() {
     }
   };
 
-  // Filter & search logic
-  const filteredStudents = students.filter((student) =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (selectedCourse === "" || student.course === selectedCourse)
-  );
+  // Filter & search logic with null checks
+  const filteredStudents = students.filter((student) => {
+    const name = student.name || '';
+    const course = student.course || '';
+    return name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (selectedCourse === "" || course === selectedCourse);
+  });
 
   // Export to Excel
   const exportToExcel = () => {
@@ -70,7 +77,7 @@ export default function StudentsTable() {
   });
 
   // Get unique courses for filter dropdown
-  const uniqueCourses = [...new Set(students.map(student => student.course))].filter(Boolean);
+  const uniqueCourses = [...new Set(students.map(student => student.course || ''))].filter(course => course);
 
   return (
     <div className="p-6 bg-white rounded-xl shadow-md">
@@ -153,7 +160,11 @@ export default function StudentsTable() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
-                       <img src={student.photo} alt="" className="rounded-full" />
+                        {student.photo ? (
+                          <img src={student.photo} alt="" className="rounded-full h-full w-full object-cover" />
+                        ) : (
+                          student.name.charAt(0).toUpperCase()
+                        )}
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{student.name}</div>
@@ -169,11 +180,11 @@ export default function StudentsTable() {
                       ${student.course === 'Web Development' ? 'bg-green-100 text-green-800' : 
                         student.course === 'Data Science' ? 'bg-blue-100 text-blue-800' : 
                         'bg-purple-100 text-purple-800'}`}>
-                      {student.course}
+                      {student.course || 'Not enrolled'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {student.contact || student.mobile || 'N/A'}
+                    {student.contact || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
