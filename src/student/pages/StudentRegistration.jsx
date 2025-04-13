@@ -41,7 +41,7 @@ const StudentRegistration = () => {
 
     useEffect(() => {
         const fetchCourses = async () => {
-            const querySnapshot = await getDocs(collection(db, "courses"));
+            const querySnapshot = await getDocs(collection(db, "courseData"));
             const coursesData = querySnapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
