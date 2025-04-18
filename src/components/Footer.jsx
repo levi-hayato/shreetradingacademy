@@ -1,10 +1,11 @@
 import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate} from "react-router-dom";
 
-const Resume = 'https://drive.google.com/file/d/1b5kWM4xNih8-3JDu_efI8d5qTwSUDMn9/view?usp=sharing';
+const Resume = 'https:';
 
 const Footer = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   
   const downloadCV = (url) => {
     const fileName = url.split('/').pop();
@@ -26,7 +27,7 @@ const Footer = () => {
     "/dash",
     "/dash/*",
     "/content/*",
-    "/course/*"  // Added this to hide footer on course pages
+    "/course/*",
   ];
 
   const shouldHideFooter = hideFooterRoutes.some(route => {
@@ -41,7 +42,7 @@ const Footer = () => {
   }
 
   return (
-    <div className="bg-[#422687] text-white py-10 px-5 flex flex-col items-center">
+    <div className="bg-gray-900 text-white py-10 px-5 flex flex-col items-center">
       {/* Call-to-Action Section */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-5 w-full max-w-screen-lg p-6 bg-white text-black shadow-lg rounded-lg transform -translate-y-22">
         <div>
@@ -109,7 +110,13 @@ const Footer = () => {
       {/* Copyright Section */}
       <div className="w-full mt-8 text-center">
         <hr className="border-gray-700 mb-4" />
+        <div className="flex justify-between px-10">
         <p className="text-gray-100">@{new Date().getFullYear()} Shree Trading Academy. All Rights Reserved.</p>
+        <div className="flex gap-6">
+        <button onClick={() => navigate('/privacypolicy')} className="text-white hover:text-btn" >Privacy Policy</button>
+        <button onClick={() => navigate('/termsandconditions')} className="text-white hover:text-btn" >Terms & Conditions</button>
+        </div>
+        </div>
       </div>
     </div>
   );

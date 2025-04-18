@@ -4,7 +4,7 @@ import { doc, getDoc, setDoc, collection, getDocs, query, where } from "firebase
 import { signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { useUser } from "../context/UserContext";
 import { FcGoogle } from "react-icons/fc";
-import { FiUser, FiLock, FiCalendar, FiPhone, FiMail } from "react-icons/fi";
+import { FiUser, FiLock, FiCalendar, FiPhone, FiMail, FiEye, FiEyeOff } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,6 +28,7 @@ const Login = () => {
         joiningDate: new Date().toISOString().split("T")[0],
     });
     const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         const fetchCourses = async () => {
@@ -76,7 +77,7 @@ const Login = () => {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-            
+
             // Fetch student data by email instead of UID
             const studentsRef = collection(db, "students");
             const q = query(studentsRef, where("email", "==", user.email));
@@ -124,7 +125,7 @@ const Login = () => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             const user = result.user;
-            
+
             // Fetch student data by email for Google sign-in too
             const studentsRef = collection(db, "students");
             const q = query(studentsRef, where("email", "==", user.email));
@@ -206,8 +207,8 @@ const Login = () => {
                         exit={{ opacity: 0, y: -50 }}
                         transition={{ duration: 0.3 }}
                         className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center space-x-4 ${alert.type === "success"
-                                ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                                : "bg-rose-100 text-rose-800 border border-rose-200"
+                            ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                            : "bg-rose-100 text-rose-800 border border-rose-200"
                             }`}
                     >
                         <div className="font-medium">{alert.message}</div>
@@ -256,13 +257,22 @@ const Login = () => {
                                         <FiLock className="text-gray-400" />
                                     </div>
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         placeholder="Password"
                                         className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
                                     />
+                                    <button
+                                        type="button"
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        <span className="text-sm text-blue-600 hover:text-blue-800">
+                                            {showPassword ? <FiEye color="black" /> : <FiEyeOff color="black" />}
+                                        </span>
+                                    </button>
                                 </div>
                             </div>
 
@@ -280,8 +290,8 @@ const Login = () => {
                                 type="submit"
                                 disabled={loading}
                                 className={`w-full flex items-center justify-center py-3 px-4 rounded-lg font-medium text-white transition-all ${loading
-                                        ? 'bg-blue-400 cursor-not-allowed'
-                                        : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                                    ? 'bg-blue-400 cursor-not-allowed'
+                                    : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
                                     }`}
                             >
                                 {loading ? (

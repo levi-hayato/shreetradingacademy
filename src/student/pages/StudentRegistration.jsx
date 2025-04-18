@@ -13,11 +13,13 @@ import { FaArrowLeft, FaBookOpen, FaRupeeSign } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAlertContext } from "../../context/AlertContext";
 import { TailSpin } from "react-loader-spinner";
+import { FiEye , FiEyeOff } from "react-icons/fi";
 
 const StudentRegistration = () => {
     const { setUser } = useContext(UserContext);
     const navigate = useNavigate();
     const { showAlert } = useAlertContext();
+    
 
     const [student, setStudent] = useState({
         name: "",
@@ -38,6 +40,8 @@ const StudentRegistration = () => {
     const [zoom, setZoom] = useState(1);
     const [showCropper, setShowCropper] = useState(false);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfPassword, setShowConfPassword] = useState(false);
 
     useEffect(() => {
         const fetchCourses = async () => {
@@ -308,13 +312,22 @@ const StudentRegistration = () => {
                                         <IoLockClosed className="text-gray-400" />
                                     </div>
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         placeholder="Password"
                                         className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                         required
                                         value={student.password}
                                         onChange={(e) => setStudent({ ...student, password: e.target.value })}
                                     />
+                                     <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  <span className="text-sm text-blue-600 hover:text-blue-800">
+                    {showPassword ? <FiEye color="black"/> : <FiEyeOff color="black"/>}
+                  </span>
+                </button>
                                 </div>
 
                                 {/* Confirm Password */}
@@ -323,13 +336,22 @@ const StudentRegistration = () => {
                                         <IoKey className="text-gray-400" />
                                     </div>
                                     <input
-                                        type="password"
+                                          type={showConfPassword ? "text" : "password"}
                                         placeholder="Confirm Password"
                                         className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                         required
                                         value={student.confirmPassword}
                                         onChange={(e) => setStudent({ ...student, confirmPassword: e.target.value })}
                                     />
+                                     <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowConfPassword(!showConfPassword)}
+                >
+                  <span className="text-sm text-blue-600 hover:text-blue-800">
+                    {showConfPassword ?  <FiEye color="black"/> : <FiEyeOff color="black"/>}
+                  </span>
+                </button>
                                 </div>
                             </div>
 

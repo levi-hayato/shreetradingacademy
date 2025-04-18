@@ -46,6 +46,8 @@ import TextEditorPage from "./pages/Editor";
 import ContentViewPage from "./pages/ContentViewPage";
 import CourseIntro from "./student/pages/CourseIntro";
 import MyCourses from "./student/pages/MyCoursePage";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import PrivacyPolicy from "./pages/PrivacyAndPolicy";
 
 
 
@@ -75,6 +77,8 @@ function App() {
               <Route path="/content/:courseID" element={<CourseContent />} />
               <Route path="/edi" element={<TextEditorPage />} />
               <Route path="/view" element={<ContentViewPage />} />
+              <Route path="/termsandconditions" element={<TermsAndConditions />} />
+              <Route path="/privacypolicy" element={<PrivacyPolicy />} />
               
            
               <Route element={<Layout />}>

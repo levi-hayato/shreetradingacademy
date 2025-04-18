@@ -75,7 +75,7 @@ const Navbar = () => {
   return (
     <>
       {!shouldHideNavbar && (
-        <nav className="font-poppins flex justify-center w-full md:px-8 bg-white dark:bg-gray-600 bg-fresh-shapes bg-cover bg-center">
+        <nav className="font-poppins flex justify-center w-full md:px-8 bg-white dark:bg-gray-900 bg-fresh-shapes bg-cover bg-center">
           <div className="container w-full flex justify-between items-center py-4">
             {/* Logo Section */}
             <div className=" lg-auto">
@@ -90,7 +90,7 @@ const Navbar = () => {
                     <NavLink
                       to={item.link}
                       className={({ isActive }) =>
-                        `inline-block py-2 px-4 hover:text-btn hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 ${isActive ? "text-btn font-bold bg-gray-100 dark:bg-gray-700" : ""
+                        `inline-block py-2 px-4 hover:text-btn hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg transition-all duration-300 ${isActive ? "text-btn font-bold bg-gray-100 dark:bg-gray-700" : ""
                         }`
                       }
                     >
